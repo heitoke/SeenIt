@@ -1,6 +1,8 @@
 <template>
     <header>
-        <div class="logo">SeenIt</div>
+        <NuxtLink to="/">
+            <div class="logo">SeenIt</div>
+        </NuxtLink>
 
         <div style="margin-left: auto;"></div>
 

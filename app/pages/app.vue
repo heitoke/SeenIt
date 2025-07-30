@@ -1,11 +1,14 @@
 <template>
-    <main class="app">
-        <div class="header">
-            <Combobox v-model="selectedList" by="label">
+    <div class="app">
+        <div class="sidebar">
+            <Combobox by="label"
+                :model-value="$lists.selectedList"
+                @update:model-value="selectList(Number($event))"
+            >
                 <ComboboxAnchor as-child>
                     <ComboboxTrigger as-child>
-                        <Button variant="outline" class="justify-between" style="width: 215px;">
-                            {{ selectedList?.name ?? 'Select list' }}
+                        <Button variant="outline" class="justify-between" style="width: 100%;">
+                            {{ $lists.selectedList?.name ?? 'Select list' }}
 
                             <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -26,22 +29,20 @@
 
                     <ComboboxGroup>
                         <ComboboxItem
-                            v-for="list in lists"
+                            v-for="list in $lists.lists"
                             :key="list.id"
-                            :value="list"
-
-                            @select="selectList(list.id)"
+                            :value="list.id"
                         >
                             {{ list.name }}
 
-                            <ComboboxItemIndicator v-if="selectedList?.id === list.id">
+                            <ComboboxItemIndicator v-if="$lists.selectedList?.id === list.id">
                                 <Check :class="cn('ml-auto h-4 w-4')" />
                             </ComboboxItemIndicator>
                         </ComboboxItem>
 
                         <NameField
                             title="Create new list"
-                            @save="addNewList($event.name)"
+                            @save="createNewList($event.name)"
                         >
                             <Button style="margin-top: 8px; width: 100%;">
                                 <Plus/>
@@ -53,112 +54,105 @@
                 </ComboboxList>
             </Combobox>
 
-            
-
-            <SearchTMDB @save="addTitles($event)" v-if="$route.params?.listId && $route.params?.categoryId">
-                <Button class="add">
-                    <Search/>
-
-                    <span>Search title</span>
+            <template v-if="$lists.selectedList?.id">
+                <Button variant="outline"
+                    @click="selectCategory(0)"
+                >
+                    <Heart/>
+                    <span>Liked</span>
                 </Button>
-            </SearchTMDB>
 
-            <div class="relative w-full max-w items-center" v-if="$route.params?.listId && $route.params?.categoryId">
-                <Input id="search" type="text" placeholder="Search..." class="pl-8" />
-                <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-                    <Search class="size-4 text-muted-foreground" />
-                </span>
-            </div>
+                <Button v-for="category of $lists.selectedList?.categories" :key="category.id"
+                    :variant="$lists.selectedCategory?.id === category.id ? 'default' : 'secondary'"
+
+                    @click="selectCategory(category.id)"
+                >
+                    <div>
+                        <div>{{ category.name }}</div>
+                    </div>
+                </Button>
+
+                <NameField title="Create new category"
+                    @save="createNewCategory($event.name)"
+                >
+                    <Button variant="ghost">
+                        <Plus/>
+                        <span>Create new category</span>
+                    </Button>
+                </NameField>
+            </template>            
         </div>
 
-        <NuxtPage :list="selectedList" v-if="selectedList?.id"/>
-    </main>
+        <main>
+            <NuxtPage/>
+        </main>
+    </div>
 </template>
 
 <script lang="ts" setup>
 
 // * Components
 import NameField from '~/components/dialogs/NameField.vue';
-import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
 
-import { Check, ChevronsUpDown, Search, Plus } from 'lucide-vue-next';
+import { Check, ChevronsUpDown, Search, Plus, Heart } from 'lucide-vue-next';
 
-// * Utils
-import { cn } from '@/lib/utils';
+// * Stores
+import { useListsStore } from '~/stores/lists';
 
-// * Types
-import type { DBList, DBTitle } from '~~/types/list';
-import type { TMDBTitleInSearch } from '~~/types/tmdb';
+// *Libs
+import { cn } from '~/lib/utils';
 
 
 const $route = useRoute();
 
 
-const lists = ref<Array<DBList>>([]);
-
-const selectedList = ref<DBList>();
+const $lists = useListsStore();
 
 
+function selectList(listId: number) {
+    navigateTo('/app/' + listId);
+}
 
-async function getLists() {
-    const dataLists = await $fetch<Array<DBList>>('/api/lists');
+function selectCategory(categoryId: number) {
+    $lists.selectLC('category', categoryId);
 
-    if (dataLists.length < 1) return;
-
-    lists.value = dataLists;
-
-    if ($route.params?.listId) {
-        selectList(Number($route.params?.listId), false);
-    }
+    navigateTo(`/app/${$lists.selectedList?.id}/${categoryId}`);
 }
 
 
-async function addNewList(name: string) {
+async function createNewList(name: string) {
     if (!name) return;
 
-    const data = await $fetch<DBList>('/api/lists', {
-        body: {
-            name
-        },
-        method: 'POST'
-    });
-
-    if (!data?.id) return;
-
-    lists.value.push(data);
+    $lists.createList(name);
 }
 
-async function addTitles(titles: Array<TMDBTitleInSearch>) {
-    if (titles.length < 1) return;
+async function createNewCategory(name: string) {
+    if (!name || !$lists.selectedList?.id) return;
 
-    for (const title of titles) {
-        const data = await $fetch<DBTitle>(`/api/lists/${selectedList.value?.id}/categories/${$route.params.categoryId}/titles`, {
-            body: {
-                data: title
-            },
-            method: 'POST'
-        });
-
-        if (!data?.id) continue;
-
-        console.log(title)
-    }
+    $lists.createCategory($lists.selectedList?.id, name);
 }
 
-function selectList(listId: number, navTo: boolean = true) {
-    const list = lists.value.find(l => l.id === listId);
 
-    if (!list) return;
 
-    selectedList.value = list;
 
-    if (navTo) navigateTo(`/app/${listId}`);
-}
+watch(() => $route.params?.listId, newId => {
+    $lists.selectLC('list', Number(newId));
+});
+
+watch(() => $route.params?.categoryId, newId => {
+    $lists.selectLC('category', Number(newId));
+});
+
 
 
 onMounted(() => {
-    getLists();
+    const listId = Number($route.params?.listId);
+    const categoryId = Number($route.params?.categoryId);
+
+    if (!isNaN(listId)) $lists.selectLC('list', listId);
+    if (!isNaN(categoryId)) $lists.selectLC('category', categoryId);
 });
+
 
 
 definePageMeta({
@@ -170,18 +164,23 @@ definePageMeta({
 <style lang="scss" scoped>
 
 .page.app {
+    display: grid;
     width: 100%;
+    grid-template-columns: 215px 1fr;
+    gap: 12px;
 }
 
-.header {
-    display: flex;
-    margin-bottom: 12px;
-    width: 100%;
-    align-items: center;
-    gap: 8px;
 
-    .add {
-        cursor: pointer;
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .page.app {
+        display: flex;
+        flex-direction: column;
     }
 }
 

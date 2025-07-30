@@ -1,6 +1,8 @@
 <template>
     <Header/>
 
+    <NuxtPwaManifest/>
+
     <NuxtPage class="page"/>
 </template>
 
@@ -8,6 +10,15 @@
 
 // * Components
 import Header from '~/components/header/Index.vue';
+import { useListsStore } from './stores/lists';
+
+
+const $lists = useListsStore()
+
+
+onMounted(() => {
+    $lists.getMyData()
+});
 
 
 useSeoMeta({

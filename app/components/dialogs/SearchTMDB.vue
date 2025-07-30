@@ -21,20 +21,23 @@
 
             <ul>
                 <TitleCard v-for="title of titles" :key="title.id"
-                    :title="title"
+                    :title="({ data: title } as any)"
                     :selected="selectedTitles.has(title.id)"
+                    :disable-context-menu="true"
 
                     @click="selectedTitles.has(title.id) ? selectedTitles.delete(title.id) : selectedTitles.set(title.id, title)"
                 />
             </ul>
 
             <DialogFooter>
-                <Button :disabled="selectedTitles.size < 1"
-                    @click="$emit('save', [...selectedTitles.values()])"
-                >
-                    <Plus/>
-                    <span>Add ({{ selectedTitles.size }})</span>
-                </Button>
+                <DialogClose>
+                    <Button :disabled="selectedTitles.size < 1"
+                        @click="$emit('save', [...selectedTitles.values()])"
+                    >
+                        <Plus/>
+                        <span>Add titles ({{ selectedTitles.size }})</span>
+                    </Button>
+                </DialogClose>
             </DialogFooter>
         </DialogContent>
     </Dialog>

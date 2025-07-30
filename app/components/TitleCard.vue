@@ -1,27 +1,85 @@
 <template>
-    <div :class="['title-card', { selected }]">
-        <div class="image">
-            <div class="media">{{ title?.media_type }}</div>
-            <img :src="`${$url.origin}/api/images/t/p/original/${title.poster_path}`" alt="">
-        </div>
-    
-        <div>{{ title.name ?? title.title }}</div>
-    </div>
+    <ContextMenu>
+        <ContextMenuTrigger>
+            <div :class="['title-card', { selected }]"
+                @click="$emit('click', $event)"
+            >
+                <div class="image">
+                    <div class="media">{{ data?.media_type }}</div>
+                    <div :class="['like', { active: title.liked }]"><Heart :size="16"/></div>
+                    <img :src="`${$url.origin}/api/images/t/p/original/${data.poster_path}`" alt="">
+                </div>
+            
+                <div>{{ data.name ?? data.title }}</div>
+            </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent class="w-56" v-if="!disableContextMenu">
+            <ContextMenuItem @click="title.like()">
+                <Heart v-show="!title.liked"/>
+                <HeartOff v-show="title.liked"/>
+
+                <span>{{ title.liked ? 'Unliked' : 'Liked' }}</span>
+            </ContextMenuItem>
+            <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                    Move to...
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent class="w-48">
+                    <ContextMenuSub v-for="list of $lists.lists" :key="list.id">
+                        <ContextMenuSubTrigger>
+                            {{ list.name }}
+                        </ContextMenuSubTrigger>
+                        <ContextMenuSubContent class="w-48">
+                            <ContextMenuItem v-for="category of list.categories" :key="category.id"
+                                @click="title.move(category.id)"
+                            >
+                                {{ category.name }}
+                            </ContextMenuItem>
+                        </ContextMenuSubContent>
+                    </ContextMenuSub>
+                </ContextMenuSubContent>
+            </ContextMenuSub>
+            <ContextMenuSeparator />
+            <ContextMenuItem @click="title.delete()">
+                <Trash/>
+
+                <span>Delete</span>
+            </ContextMenuItem>
+        </ContextMenuContent>
+    </ContextMenu>
 </template>
 
 <script lang="ts" setup>
 
+import { Trash, Heart, HeartOff } from 'lucide-vue-next';
+
+// * Stores
+import { useListsStore } from '~/stores/lists';
+
 // * Types
-import type { TMDBTitleInSearch } from '~~/types/tmdb';
+import type { Title } from '~~/types/list';
 
 
 const $url = useRequestURL();
 
 
-defineProps<{
-    title: TMDBTitleInSearch;
+const $lists = useListsStore();
+
+
+const props = defineProps<{
+    title: Title;
     selected?: boolean;
+    disableContextMenu?: boolean;
 }>();
+
+defineEmits({
+    click(event: MouseEvent) {
+        return event;
+    }
+})
+
+
+const data = computed(() => props.title?.data);
 
 </script>
 
@@ -58,6 +116,17 @@ defineProps<{
             border-radius: 5px;
             background-color: var(--secondary);
             z-index: 2;
+        }
+
+        .like {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            z-index: 2;
+
+            &.active {
+                color: red;
+            }
         }
 
         img {
