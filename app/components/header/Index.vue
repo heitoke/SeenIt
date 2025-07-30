@@ -2,6 +2,9 @@
     <header>
         <div class="logo">SeenIt</div>
 
+        <div style="margin-left: auto;"></div>
+
+        <Language/>
         <Account/>
     </header>
 </template>
@@ -10,6 +13,7 @@
 
 // * Components
 import Account from './Account.vue';
+import Language from './Language.vue';
 
 </script>
 
@@ -24,6 +28,7 @@ header {
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
+    gap: 12px;
 }
 
 </style>

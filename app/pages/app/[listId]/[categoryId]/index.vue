@@ -13,38 +13,33 @@ import TitleCard from '~/components/TitleCard.vue';
 
 // * Types
 import type { DBList, DBCategory, DBTitle } from '~~/types/list';
-import type { TMDBTitleInSearch } from '~~/types/tmdb';
 
 
 const props = defineProps<{
     list: DBList;
-    category: DBCategory;
+    category?: DBCategory;
 }>();
 
 
-const titles = ref<Array<DBTitle<TMDBTitleInSearch>>>([]);
+const titles = ref<Array<DBTitle>>([]);
 
 
 async function getTitleByCategoryId(categoryId: number) {
-    const data = await $fetch<Array<DBTitle>>(`/api/lists/${props.list.id}/categories/${categoryId}/titles`);
+    if (!categoryId) return;
 
-    if (data.length < 1) return;
+    const dataTitles = await $fetch<Array<DBTitle>>(`/api/lists/${props.list.id}/categories/${categoryId}/titles`);
 
-    console.log('titles', props.list.id, props.category.id, data)
+    if (dataTitles.length < 1) return;
 
-    titles.value = data as any;
-
-    console.log(titles.value)
+    titles.value = dataTitles;
 }
 
-
-watch(() => props.category?.id, (newId) => {
-    getTitleByCategoryId(newId);
-});
-
-
 onMounted(() => {
-    getTitleByCategoryId(props.category?.id);
+    const id = props.category?.id;
+
+    if (!id) return;
+
+    getTitleByCategoryId(id);
 });
 
 </script>

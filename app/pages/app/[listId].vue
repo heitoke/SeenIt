@@ -17,7 +17,10 @@
             </NameField>
         </div>
 
-        <NuxtPage :list="list" :category="selectedCategory"/>
+        <NuxtPage v-if="selectedCategory?.id"
+            :list="list"
+            :category="selectedCategory"
+        />
     </div>
 </template>
 
@@ -32,6 +35,9 @@ import NameField from '~/components/dialogs/NameField.vue';
 import type { DBList, DBCategory } from '~~/types/list';
 
 
+const $route = useRoute();
+
+
 const props = defineProps<{
     list: DBList;
 }>();
@@ -43,20 +49,20 @@ const selectedCategoryId = ref<number>(0);
 
 
 const selectedCategory = computed(() => {
-    return categories.value.find(c => c.id === selectedCategoryId.value);
+    return categories.value.find(c => c.id === selectedCategoryId.value) || null;
 });
 
 
 async function getCategoriesByListId(listId: number) {
     const data = await $fetch<Array<DBCategory>>(`/api/lists/${listId}/categories`);
 
-    console.log(data)
-
     if (data.length < 1) return;
 
     categories.value = data;
 
-    selectCategory(data[0]!.id);
+    if ($route.params?.categoryId) {
+        selectCategory(Number($route.params?.categoryId), false);
+    }
 }
 
 
@@ -77,14 +83,14 @@ async function addNewCategory(name: string) {
     if (categories.value.length === 1) selectCategory(data.id);
 }
 
-async function selectCategory(categoryId: number) {
+async function selectCategory(categoryId: number, navTo: boolean = true) {
     const category = categories.value.find(c => c.id === categoryId);
     
     if (!category) return;
 
     selectedCategoryId.value = category.id;
 
-    await navigateTo(`/app/${props.list.id}/${category.id}`);
+    if (navTo) await navigateTo(`/app/${props.list.id}/${category.id}`);
 }
 
 
@@ -113,7 +119,7 @@ onMounted(() => {
     max-width: 215px;
     width: 215px;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 
     button {
         cursor: pointer;

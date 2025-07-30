@@ -14,14 +14,14 @@
 
                 <ComboboxList>
                     <div class="relative w-full max-w-sm items-center">
-                        <ComboboxInput class="focus-visible:ring-0 border-0 border-b rounded-none h-10" placeholder="Select framework..." />
+                        <ComboboxInput class="focus-visible:ring-0 border-0 border-b rounded-none h-10" placeholder="Select list..." />
                         <span class="absolute start-0 inset-y-0 flex items-center justify-center px-3">
                             <Search class="size-4 text-muted-foreground" />
                         </span>
                     </div>
 
                     <ComboboxEmpty>
-                        No framework found.
+                        No list found.
                     </ComboboxEmpty>
 
                     <ComboboxGroup>
@@ -34,34 +34,36 @@
                         >
                             {{ list.name }}
 
-                            <ComboboxItemIndicator>
+                            <ComboboxItemIndicator v-if="selectedList?.id === list.id">
                                 <Check :class="cn('ml-auto h-4 w-4')" />
                             </ComboboxItemIndicator>
                         </ComboboxItem>
+
+                        <NameField
+                            title="Create new list"
+                            @save="addNewList($event.name)"
+                        >
+                            <Button style="margin-top: 8px; width: 100%;">
+                                <Plus/>
+
+                                <span>Create new list</span>
+                            </Button>
+                        </NameField>
                     </ComboboxGroup>
                 </ComboboxList>
             </Combobox>
 
-            <NameField
-                title="Create new list"
-                @save="addNewList($event.name)"
-            >
-                <Button class="add">
-                    <Plus/>
-
-                    <span v-if="!$route.params?.listId">Add list</span>
-                </Button>
-            </NameField>
+            
 
             <SearchTMDB @save="addTitles($event)" v-if="$route.params?.listId && $route.params?.categoryId">
                 <Button class="add">
-                    <Plus/>
+                    <Search/>
 
                     <span>Search title</span>
                 </Button>
             </SearchTMDB>
 
-            <div class="relative w-full max-w-sm items-center" v-if="$route.params?.listId && $route.params?.categoryId">
+            <div class="relative w-full max-w items-center" v-if="$route.params?.listId && $route.params?.categoryId">
                 <Input id="search" type="text" placeholder="Search..." class="pl-8" />
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                     <Search class="size-4 text-muted-foreground" />
@@ -97,14 +99,17 @@ const lists = ref<Array<DBList>>([]);
 const selectedList = ref<DBList>();
 
 
+
 async function getLists() {
-    const data = await $fetch<Array<DBList>>('/api/lists');
+    const dataLists = await $fetch<Array<DBList>>('/api/lists');
 
-    if (data.length < 1) return;
+    if (dataLists.length < 1) return;
 
-    lists.value = data;
+    lists.value = dataLists;
 
-    selectList(data[0]!.id);
+    if ($route.params?.listId) {
+        selectList(Number($route.params?.listId), false);
+    }
 }
 
 
@@ -140,14 +145,14 @@ async function addTitles(titles: Array<TMDBTitleInSearch>) {
     }
 }
 
-function selectList(listId: number) {
+function selectList(listId: number, navTo: boolean = true) {
     const list = lists.value.find(l => l.id === listId);
 
     if (!list) return;
 
     selectedList.value = list;
 
-    navigateTo(`/app/${listId}`);
+    if (navTo) navigateTo(`/app/${listId}`);
 }
 
 

@@ -1,3 +1,5 @@
+import type { TMDBTitleInSearch } from './tmdb';
+
 export interface DBList {
     id: number;
     name: string;
@@ -7,20 +9,16 @@ export interface DBList {
 export interface DBCategory {
     id: number;
     name: string;
-    listId: number;
-    createdAt: number;
+    list_id: number;
+    created_at: number;
 }
 
-export interface DBTitleOptions {
-    liked: boolean;
-}
-
-export interface DBTitle<TypeData = string, TypeOptions = string> {
+export interface DBTitle {
     id: number;
-    categoryId: number;
-    titleId: number;
-    data: TypeData;
-    options: TypeOptions;
-    updatedAt: number;
-    createdAt: number;
+    category_id: number;
+    title_id: number;
+    data: TMDBTitleInSearch;
+    liked: boolean;
+    updated_at: number;
+    created_at: number;
 }

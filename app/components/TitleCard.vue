@@ -2,7 +2,7 @@
     <div :class="['title-card', { selected }]">
         <div class="image">
             <div class="media">{{ title?.media_type }}</div>
-            <img :src="`https://image.tmdb.org/t/p/original/${title.poster_path}`" alt="">
+            <img :src="`${$url.origin}/api/images/t/p/original/${title.poster_path}`" alt="">
         </div>
     
         <div>{{ title.name ?? title.title }}</div>
@@ -13,6 +13,9 @@
 
 // * Types
 import type { TMDBTitleInSearch } from '~~/types/tmdb';
+
+
+const $url = useRequestURL();
 
 
 defineProps<{
