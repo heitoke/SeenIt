@@ -29,9 +29,9 @@
                 />
             </ul>
 
-            <DialogFooter>
+            <DialogFooter v-if="selectedTitles.size > 0">
                 <DialogClose>
-                    <Button :disabled="selectedTitles.size < 1"
+                    <Button
                         @click="$emit('save', [...selectedTitles.values()])"
                     >
                         <Plus/>

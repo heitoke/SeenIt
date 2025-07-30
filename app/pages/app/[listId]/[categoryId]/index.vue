@@ -1,7 +1,7 @@
 <template>
     <div class="list-titles">
         <div class="toolsbar">
-            <SearchTMDB>
+            <SearchTMDB @save="addTitles($event)">
                 <Button class="add">
                     <Search/>
 
@@ -114,6 +114,7 @@ import { useListsStore } from '~/stores/lists';
 
 // * Types
 import type { Title } from '~~/types/list';
+import type { TMDBTitleInSearch } from '~~/types/tmdb';
 
 
 const $route = useRoute();
@@ -130,6 +131,13 @@ const listTitles = computed(() => {
     return $lists.selectedCategory?.titles.filter(t => regex.test(t.data.name) || regex.test(t.data.title) || regex.test(t.data.original_name) || regex.test(t.data.original_title));
 });
 
+
+
+async function addTitles(titles: Array<TMDBTitleInSearch>) {
+    if (!titles.length || !$lists.selectedCategory?.id) return;
+
+    $lists.addTitles(titles, $lists.selectedCategory?.id);
+}
 
 
 function onClickTitle(title: Title) {

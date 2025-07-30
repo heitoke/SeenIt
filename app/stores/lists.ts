@@ -3,6 +3,7 @@ import type {
     DBList, DBCategory, DBTitle,
     List, Category, Title
 } from '~~/types/list';
+import type { TMDBTitleInSearch } from '~~/types/tmdb';
 
 
 export const useListsStore = defineStore('lists', () => {
@@ -178,6 +179,27 @@ export const useListsStore = defineStore('lists', () => {
         return category;
     }
 
+    async function addTitles(listTitles: Array<TMDBTitleInSearch>, categoryId: number) {
+        if (!listTitles.length || !categoryId) return;
+
+        const category = categories.value.find(c => c.id === categoryId);
+
+        if (!category) return;
+
+        const data = await $fetch<Array<DBTitle>>(`/api/lists/${category.listId}/categories/${category.id}/titles`, {
+            body: {
+                titles: listTitles
+            },
+            method: 'POST'
+        });
+
+        for (const dbTitle of data) {
+            if (!dbTitle?.id) continue;
+
+            _titles.value.push(convertTitle(dbTitle));
+        }
+    }
+
 
     async function moveTitles(ids: Array<Number>, newCategoryId: number) {
         if (!ids.length || !newCategoryId) return null;
@@ -259,6 +281,7 @@ export const useListsStore = defineStore('lists', () => {
 
         createList,
         createCategory,
+        addTitles,
 
         moveTitles,
         likeTitles,

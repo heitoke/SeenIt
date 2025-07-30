@@ -10,20 +10,23 @@ export default defineEventHandler(async (event) => {
 
     const categoryId = Number(await getRouterParam(event, 'categoryId'));
     
-    const { data: bodyData, liked = false } = await readBody(event) as { data: TMDBTitleInSearch, liked?: boolean };
+    const { titles: bodyTitles, liked = false } = await readBody(event) as { titles: Array<TMDBTitleInSearch>, liked?: boolean };
 
-    const { data, error } = await client.from('titles')
-        .upsert({
-            category_id: categoryId,
-            title_id: bodyData?.id,
-            data: bodyData,
-            liked
-        })
-        .single();
+    const result = [];
 
-    if (error) {
-        throw createError({ statusMessage: error.message });
+    console.log(bodyTitles)
+    for (const title of bodyTitles) {
+        const { data, error } = await client.from('titles')
+            .upsert({
+                category_id: categoryId,
+                title_id: title.id,
+                data: title,
+                liked
+            })
+            .select();
+        
+        result.push(error ? error : data[0]);
     }
 
-    return data;
+    return result;
 });

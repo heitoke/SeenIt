@@ -1,7 +1,10 @@
 <template>
     <header>
         <NuxtLink to="/">
-            <div class="logo">SeenIt</div>
+            <div class="logo">
+                <img src="/seen-it-dark-256x256.png" alt="Logo">
+                <span>SeenIt</span>
+            </div>
         </NuxtLink>
 
         <div style="margin-left: auto;"></div>
@@ -31,6 +34,25 @@ header {
     justify-content: space-between;
     box-sizing: border-box;
     gap: 12px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    img {
+        margin-right: 8px;
+        width: 42px;
+        filter: invert(1);
+    }
+
+    span {
+        font-weight: 700;
+    }
 }
 
 </style>
