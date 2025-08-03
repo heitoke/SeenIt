@@ -9,7 +9,9 @@
 const $route = useRoute();
 
 
-navigateTo(`/u/${$route.params?.userId}/lists`);
+onMounted(() => {
+    navigateTo(`/u/${$route.params?.userId}/lists`);
+});
 
 
 definePageMeta({
