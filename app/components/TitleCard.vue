@@ -5,13 +5,13 @@
                 @click="$emit('click', $event)"
             >
                 <div class="image">
-                    <div class="media">{{ $t(data?.media_type) }}</div>
+                    <div class="media">{{ $t(data?.mediaType) }}</div>
                     <div :class="['like', { active: title.liked }]"><Heart :size="14"/></div>
                     <img :src="titlePoster" alt="Title Poster">
                 </div>
 
                 <div class="details">
-                    <div class="name">{{ data.name ?? data.title }} asd asd asdas das das da</div>
+                    <div class="name">{{ data.name ?? data.title }}</div>
                     <div class="genres" v-if="data?.genres?.length">{{ data.genres.map(g => g.name).join(', ') }}</div>
 
                     <ul>

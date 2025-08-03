@@ -19,6 +19,7 @@ export interface DBTitle {
     tmdb_title_id: number;
     title: {
         data: TMDBTitle;
+        media_type: 'movie' | 'tv';
         updated_at: string;
     };
     liked: boolean;
@@ -29,7 +30,7 @@ export interface DBTitle {
 
 
 interface Title extends Pick<DBTitle, 'id' | 'liked'> {
-    data: TMDBTitle & { lastUpdatedAt: Date };
+    data: TMDBTitle & { mediaType: 'movie' | 'tv', lastUpdatedAt: Date };
     categoryId: number;
     get category(): Category | null; 
     updatedAt: Date;
@@ -67,4 +68,7 @@ interface List extends Pick<DBList, 'id' | 'name'> {
     get categories(): Array<Category>;
     createdAt: Date;
     edit: ListEdit;
+
+    async update(newList: Pick<List, 'name'>): Promise<boolean>;
+    async delete(): Promise<boolean>;
 }

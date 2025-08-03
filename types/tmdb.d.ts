@@ -41,7 +41,6 @@ export interface TMDBTitle {
     tagline: string;
     homepage: string;
     overview: string;
-    media_type: 'movie' | 'tv';
     popularity: number;
     vote_count: number;
     poster_path: string;

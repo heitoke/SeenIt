@@ -35,7 +35,7 @@
                         >
                             <span class="flex-1 whitespace-nowrap text-ellipsis overflow-hidden">{{ list.name }}</span>
                             
-                            <ListSettings :listId="list.id">
+                            <ListSettings :userId="userId" :listId="list.id">
                                 <div @click.prevent.stop="" class="cursor-pointer opacity-70 hover:opacity-100">
                                     <Settings2/>
                                 </div>
@@ -177,8 +177,6 @@ watch(() => $route.params?.categoryId, newId => {
 onMounted(async () => {
     const listId = Number($route.params?.listId);
     const categoryId = Number($route.params?.categoryId);
-
-    console.log(listId, categoryId)
 
     if (!isNaN(categoryId) && !isNaN(listId)) {
         selectList(listId);

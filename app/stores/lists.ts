@@ -97,6 +97,12 @@ class CacheList {
                 toggle() {
                     return _this.toggleEditMode(dbList.id);
                 }
+            },
+            update(newList: Pick<List, 'name'>) {
+                return _this.updateList(this.id, newList);
+            },
+            delete() {
+                return _this.deleteList(this.id);
             }
         }
     }
@@ -135,6 +141,7 @@ class CacheList {
             id: dbTitle.id,
             data: {
                 ...dbTitle.title.data,
+                mediaType: dbTitle.title.media_type,
                 lastUpdatedAt: new Date(dbTitle.title.updated_at)
             },
             liked: dbTitle.liked,
@@ -163,6 +170,7 @@ class CacheList {
 
         this.lists.length = 0;
         this.categories.length = 0;
+        this.titles.length = 0;
 
         const likedCategory = this.convertCategory({
             id: 0,
@@ -322,6 +330,53 @@ class CacheList {
 
             title.liked = liked;
         }
+    }
+
+
+    async updateList(listId: number, newList: Pick<List, 'name'>) {
+        const list = this.get('list', listId);
+
+        if (!list) return false;
+
+        const data = await $fetch<{ name: string }>(`/api/lists/${list.id}`, {
+            body: {
+                name: newList.name
+            },
+            method: 'PATCH'
+        });
+
+        if (!data) return false;
+
+        list.name = data.name;
+
+        return true;
+    }
+
+
+    async deleteList(listId: number) {
+        const list = this.get('list', listId);
+
+        if (!list) return false;
+
+        const data = await $fetch<{ name: string }>(`/api/lists/${list.id}`, {
+            method: 'DELETE'
+        });
+
+        if (!data) return false;
+
+        const titles = this.titles.filter(t => t.category?.list?.id !== listId);
+        this.titles.length = 0;
+        this.titles.push(...titles);
+
+        const categories = this.categories.filter(c => c.listId !== listId);
+        this.categories.length = 0;
+        this.categories.push(...categories);
+
+        const lists = this.lists.filter(l => l.id !== listId);
+        this.lists.length = 0;
+        this.lists.push(...lists);
+
+        return true;
     }
 
 

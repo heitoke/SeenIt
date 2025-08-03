@@ -6,6 +6,12 @@
 
 <script lang="ts" setup>
 
+const $route = useRoute();
+
+
+navigateTo(`/u/${$route.params?.userId}/lists`);
+
+
 definePageMeta({
     name: 'user',
     alias: [

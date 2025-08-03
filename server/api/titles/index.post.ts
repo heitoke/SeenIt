@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
     const listTitles: Array<TMDBTitle> = [];
 
     for (const { id, mediaType } of titles) {
-        const { data: tmdbTitle, error: errorTmdbTitle } = await client.from('tmdb_titles').select().eq('id', id);
+        const { data: tmdbTitle, error: errorTmdbTitle } = await client.from('tmdb_titles').select().eq('id', id).eq('media_type', mediaType);
 
         if (errorTmdbTitle) {
             throw createError({ statusMessage: errorTmdbTitle.message });
@@ -66,11 +66,11 @@ export default defineEventHandler(async (event) => {
             });
 
             const json = await res.json();
-            json['media_type'] = mediaType;
 
             const { data: newTmdbTitle, error: errorNewTmdbTitle } = await client.from('tmdb_titles')
                 .upsert({
                     id: json.id,
+                    media_type: mediaType,
                     data: json
                 })
                 .select()
@@ -87,7 +87,7 @@ export default defineEventHandler(async (event) => {
                 tmdb_title_id: id,
                 liked
             })
-            .select('*, title:tmdb_titles (data, updated_at)');
+            .select('*, title:tmdb_titles (data, media_type, updated_at)');
 
         if (errorNewTitle) {
             throw createError({ statusMessage: errorNewTitle.message });

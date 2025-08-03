@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusMessage: errorCategories.message });
     }
 
-    const { data: titles, error: errorTitles } = await client.from('titles').select('*, title:tmdb_titles (data, updated_at)').in('category_id', categories.map(l => l.id));
+    const { data: titles, error: errorTitles } = await client.from('titles').select('*, title:tmdb_titles (data, media_type, updated_at)').in('category_id', categories.map(l => l.id));
 
     if (errorTitles) {
         throw createError({ statusMessage: errorTitles.message });
