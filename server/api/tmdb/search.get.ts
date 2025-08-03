@@ -2,9 +2,11 @@ import { TMDBSearch } from "~~/types/tmdb";
 
 export default eventHandler(async (event) => {
     const config = useRuntimeConfig(event);
-    const { text, lang = 'en-US' } = getQuery(event);
+    const { type = 'multi', text, adult = true, lang = 'en-US' } = getQuery(event);
 
-    const res = await fetch(`https://api.themoviedb.org/3/search/multi?query=${text}&include_adult=false&language=${lang}&page=1`, {
+    if (type !== 'multi' && type !== 'movie' && type !== 'tv') return { results: [] };
+
+    const res = await fetch(`https://api.themoviedb.org/3/search/${type}?query=${text}&include_adult=${adult}&language=${lang}&page=1`, {
         headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${config.tmdbApiKey}`
@@ -13,6 +15,8 @@ export default eventHandler(async (event) => {
     });
 
     const json = await res.json();
+
+    json.results = json.results.map((t: any) => ({ ...t, media_type: t?.media_type || type }));
 
     return json as TMDBSearch;
 });

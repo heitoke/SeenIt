@@ -5,12 +5,27 @@
                 @click="$emit('click', $event)"
             >
                 <div class="image">
-                    <div class="media">{{ data?.media_type }}</div>
-                    <div :class="['like', { active: title.liked }]"><Heart :size="16"/></div>
-                    <img :src="`${$url.origin}/api/images/t/p/original/${data.poster_path}`" alt="">
+                    <div class="media">{{ $t(data?.media_type) }}</div>
+                    <div :class="['like', { active: title.liked }]"><Heart :size="14"/></div>
+                    <img :src="titlePoster" alt="Title Poster">
                 </div>
-            
-                <div>{{ data.name ?? data.title }}</div>
+
+                <div class="details">
+                    <div class="name">{{ data.name ?? data.title }} asd asd asdas das das da</div>
+                    <div class="genres" v-if="data?.genres?.length">{{ data.genres.map(g => g.name).join(', ') }}</div>
+
+                    <ul>
+                        <li v-if="data?.runtime">
+                            <Timer :size="10"/>
+                            <span v-if="(data?.runtime / 60) >= 1">{{ Math.floor(data?.runtime / 60) }}h</span>
+                            <span>{{ data?.runtime % 60 }}m</span>
+                        </li>
+                        <li>
+                            <Star :size="10" color="yellow"/>
+                            <span>{{ data?.vote_average.toFixed(1) }}</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </ContextMenuTrigger>
         <ContextMenuContent class="w-56" v-if="!disableContextMenu">
@@ -25,7 +40,7 @@
                     Move to...
                 </ContextMenuSubTrigger>
                 <ContextMenuSubContent class="w-48">
-                    <ContextMenuSub v-for="list of $lists.lists" :key="list.id">
+                    <!-- <ContextMenuSub v-for="list of $lists.lists" :key="list.id">
                         <ContextMenuSubTrigger>
                             {{ list.name }}
                         </ContextMenuSubTrigger>
@@ -36,7 +51,7 @@
                                 {{ category.name }}
                             </ContextMenuItem>
                         </ContextMenuSubContent>
-                    </ContextMenuSub>
+                    </ContextMenuSub> -->
                 </ContextMenuSubContent>
             </ContextMenuSub>
             <ContextMenuSeparator />
@@ -51,7 +66,7 @@
 
 <script lang="ts" setup>
 
-import { Trash, Heart, HeartOff } from 'lucide-vue-next';
+import { Trash, Heart, HeartOff, Timer, Star } from 'lucide-vue-next';
 
 // * Stores
 import { useListsStore } from '~/stores/lists';
@@ -76,10 +91,12 @@ defineEmits({
     click(event: MouseEvent) {
         return event;
     }
-})
+});
 
 
 const data = computed(() => props.title?.data);
+
+const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/original/${data.value?.poster_path}`);
 
 </script>
 
@@ -87,6 +104,16 @@ const data = computed(() => props.title?.data);
 
 .title-card {
     cursor: pointer;
+    position: relative;
+    border-radius: 7px;
+    overflow: hidden;
+
+    &:hover {
+        .details {
+            top: auto;
+            bottom: 0px;
+        }
+    }
 
     &.selected {
         .image {
@@ -101,28 +128,43 @@ const data = computed(() => props.title?.data);
         width: 100%;
         position: relative;
         padding-bottom: 157%;
-        border-radius: 7px;
         overflow: hidden;
         transition: .2s;
 
         .media {
-            padding: 0 4px;
+            padding: 2px 4px;
             position: absolute;
-            top: 2px;
-            left: 2px;
+            top: 4px;
+            left: 4px;
             font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
             color: var(--secondary-foreground);
-            border-radius: 5px;
-            background-color: var(--secondary);
+            border-radius: 7px;
+            background-color: #00000045;
+            backdrop-filter: blur(5px);
             z-index: 2;
         }
 
         .like {
+            cursor: pointer;
+            display: flex;
+            width: 24px;
+            height: 24px;
             position: absolute;
-            top: 2px;
+            top: 4px;
             right: 4px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            background-color: #00000045;
+            backdrop-filter: blur(5px);
+            user-select: none;
             z-index: 2;
+
+            &:active {
+                transform: scale(0.95);
+            }
 
             &.active {
                 color: red;
@@ -137,14 +179,56 @@ const data = computed(() => props.title?.data);
             object-fit: cover;
             object-position: center;
             z-index: 1;
+
+            &:nth-child(4) {
+                left: 10px;
+                filter: blur(5px);
+            }
         }
     }
     
+    .details {
+        display: flex;
+        padding: 4px 8px;
+        width: 100%;
+        position: absolute;
+        top: calc(100% - 28px);
+        left: 0;
+        flex-direction: column;
+        background-color: #00000045;
+        backdrop-filter: blur(5px);
+        transition: .2s;
+        z-index: 5;
 
-    div {
-        margin-top: 2px;
-        font-weight: 700;
-        font-size: 12px;
+        .name {
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .genres {
+            font-size: 10px;
+        }
+
+        ul {
+            display: flex;
+            gap: 2px;
+
+            li {
+                display: flex;
+                padding: 2px 4px;
+                font-size: 10px;
+                border-radius: 25px;
+                align-items: center;
+                background-color: #00000045;
+
+                span {
+                    margin-left: 4px;
+                }
+            }
+        }
     }
 }
 

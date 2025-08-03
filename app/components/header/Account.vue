@@ -11,46 +11,35 @@
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                     <DropdownMenuItem>
-                        <span>Profile</span>
+                        <span>{{ $t('profile') }}</span>
                     </DropdownMenuItem>
-                    <NuxtLink to="/app">
+                    <NuxtLink :to="`/u/${$user.id}`">
                         <DropdownMenuItem>
-                            <span>Dashboard</span>
+                            <span>{{ $t('dashboard') }}</span>
                         </DropdownMenuItem>
                     </NuxtLink>
                     <DropdownMenuItem>
-                        <span>Settings</span>
+                        <span>{{ $t('settings') }}</span>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem @click="signOut">
-                    <span>Log out</span>
+                    <span>{{ $t('logOut') }}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button @click="signInWithOAuth" v-else>Sign In</Button>
+        <NuxtLink to="/login" v-else>
+            <Button>{{ $t('signIn') }}</Button>
+        </NuxtLink>
     </div>
 </template>
 
 <script lang="ts" setup>
 
-const $supabase = useSupabaseClient()
+const $supabase = useSupabaseClient();
 const $user = useSupabaseUser();
 
-
-async function signInWithOAuth() {
-    const url = useRequestURL();
-
-    const { error } = await $supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-            redirectTo: `${url.origin}/confirm`
-        },
-    });
-
-    if (error) console.log(error);
-}
 
 async function signOut() {
     const { error } = await $supabase.auth.signOut();

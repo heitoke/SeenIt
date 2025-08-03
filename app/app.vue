@@ -10,15 +10,6 @@
 
 // * Components
 import Header from '~/components/header/Index.vue';
-import { useListsStore } from './stores/lists';
-
-
-const $lists = useListsStore()
-
-
-onMounted(() => {
-    $lists.getMyData()
-});
 
 
 useSeoMeta({

@@ -3,10 +3,12 @@ import type { Database } from '~~/types/database.types';
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server';
 
 export default defineEventHandler(async (event) => {
-    const $user = await serverSupabaseUser(event);
+    // const $user = await serverSupabaseUser(event);
     const client = await serverSupabaseClient<Database>(event);
 
-    const { data: lists, error: errorLists } = await client.from('lists').select().eq('user_id', $user!.id);
+    const userId = getRouterParam(event, 'id');
+
+    const { data: lists, error: errorLists } = await client.from('lists').select().eq('user_id', userId);
 
     if (errorLists) {
         throw createError({ statusMessage: errorLists.message });
@@ -18,8 +20,15 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusMessage: errorCategories.message });
     }
 
+    const { data: titles, error: errorTitles } = await client.from('titles').select('*, title:tmdb_titles (data, updated_at)').in('category_id', categories.map(l => l.id));
+
+    if (errorTitles) {
+        throw createError({ statusMessage: errorTitles.message });
+    }
+
     return {
         lists,
-        categories
+        categories,
+        titles
     };
 });

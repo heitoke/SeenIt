@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
 
     const categoryId = getRouterParam(event, 'categoryId');
 
-    const { data, error } = await client.from('titles').select().eq('category_id', categoryId);
+    const { data, error } = await client.from('titles').select('*, title:tmdb_titles (data, updated_at)').eq('category_id', categoryId);
 
     if (error) {
         throw createError({ statusMessage: error.message });

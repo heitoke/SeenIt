@@ -1,7 +1,20 @@
 <template>
     <div class="list-titles">
-        <div class="toolsbar">
-            <SearchTMDB @save="addTitles($event)">
+        <div class="toolsbar" v-if="$cl.category">
+            <SearchTMDB
+                :userId="$cl.userId"
+                :listId="$cl.category.list?.id!"
+
+                @save="async ($event) => {
+                    $event.loading(true);
+
+                    const r = await addTitles($event.titles);
+
+                    $event.loading(false);
+
+                    if (r) $event.close();
+                }"
+            >
                 <Button class="add">
                     <Search/>
 
@@ -10,19 +23,23 @@
             </SearchTMDB>
 
             <div class="relative w-full max-w items-center" v-if="$route.params?.listId && $route.params?.categoryId">
-                <Input id="search" type="text" :placeholder="`${$t('search')}...`" class="pl-8" v-model="text"/>
+                <Input id="search" type="text" :placeholder="`${$t('search')}...`" class="pl-8"
+                    :model-value="$cl.category!.filters.text"
+
+                    @update:model-value="onSearchInput(String($event))"
+                />
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                     <Search class="size-4 text-muted-foreground" />
                 </span>
             </div>
 
-            <Toggle
-                @click="$lists.toggleEditMode()"
+            <Toggle :model-value="$cl.list?.edit.enabled"
+                @click="$cl.list?.edit.toggle()"
             >
                 <Pencil class="h-4 w-4" />
             </Toggle>
 
-            <template v-if="$lists.selectedList?.editMode.enabled">
+            <template v-if="$cl.list?.edit.enabled">
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button variant="outline">
@@ -33,16 +50,16 @@
                     <DropdownMenuContent class="w-56">
                         <DropdownMenuGroup>
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger :disabled="!$lists.selectedList?.editMode?.selected?.length">
+                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
                                     <span>{{ $t('liked') }}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuItem @click="$lists.likeTitles($lists.selectedList.editMode.selected, true)">
+                                        <DropdownMenuItem @click="$cl.likeTitles([...$cl.list!.edit.selected], true)">
                                             <Heart/>
                                             <span>{{ $t('liked') }}</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="$lists.likeTitles($lists.selectedList.editMode.selected, false)">
+                                        <DropdownMenuItem @click="$cl.likeTitles([...$cl.list!.edit.selected], false)">
                                             <HeartOff/>
                                             <span>{{ $t('unliked') }}</span>
                                         </DropdownMenuItem>
@@ -50,12 +67,12 @@
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger :disabled="!$lists.selectedList?.editMode?.selected?.length">
+                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
                                     <span>{{ $t('moveTo') }}...</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuSub v-for="list of $lists.lists" :key="list.id">
+                                        <DropdownMenuSub v-for="list of $cl.lists" :key="list.id">
                                             <DropdownMenuSubTrigger>
                                                 <span>{{ list.name }}</span>
                                             </DropdownMenuSubTrigger>
@@ -74,7 +91,7 @@
                             </DropdownMenuSub>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem :disabled="!$lists.selectedList?.editMode?.selected?.length"
+                        <DropdownMenuItem :disabled="$cl.list?.edit.selected.size < 1"
                             @click="onDeleteTitles"
                         >
                             <Trash/>
@@ -85,9 +102,9 @@
             </template>
         </div>
 
-        <div class="grid-titles" v-if="$lists?.selectedCategory?.titles?.length! > 0">
-            <TitleCard v-for="title of listTitles" :key="title.id" :title="title"
-                :selected="$lists.selectedList?.editMode?.enabled && $lists.selectedList?.editMode?.selected.includes(title.id)"
+        <div class="grid-titles" v-if="$cl?.category?.titles?.length! > 0">
+            <TitleCard v-for="title of $cl.category?.filters.titles" :key="title.id" :title="title"
+                :selected="$cl.list?.edit.enabled && $cl.list?.edit.selected.has(title.id)"
                 
                 @click="onClickTitle(title as any)"
             />
@@ -120,53 +137,72 @@ import type { TMDBTitleInSearch } from '~~/types/tmdb';
 const $route = useRoute();
 
 
+const userId = String($route.params?.userId);
+const categoryId = Number($route.params?.categoryId);
+
+
 const $lists = useListsStore();
 
 
-const text = ref('');
+const $cl = $lists.get(userId);
 
-const listTitles = computed(() => {
-    const regex = new RegExp(text.value, 'ig');
 
-    return $lists.selectedCategory?.titles.filter(t => regex.test(t.data.name) || regex.test(t.data.title) || regex.test(t.data.original_name) || regex.test(t.data.original_title));
-});
+let timer: NodeJS.Timeout;
+
+
+function onSearchInput(value: string) {
+    clearTimeout(timer);
+
+    if (!$cl.category) return;
+
+    timer = setTimeout(() => {
+        $cl.category!.filters.text = value;
+    }, 500);
+}
 
 
 
 async function addTitles(titles: Array<TMDBTitleInSearch>) {
-    if (!titles.length || !$lists.selectedCategory?.id) return;
+    if (!titles.length || !$cl.category?.id) return;
 
-    $lists.addTitles(titles, $lists.selectedCategory?.id);
+    return $cl.addTitles(titles, $cl.category?.id);
 }
 
 
 function onClickTitle(title: Title) {
-    console.log(title, $lists.selectedList?.editMode.enabled)
-    if (!$lists.selectedList?.editMode?.enabled) return;
+    if (!$cl.list || !$cl.list?.edit.enabled) return;
 
-    const selected = $lists.selectedList?.editMode?.selected
-
-    const titleIndex = selected?.indexOf(title.id);
-
-    console.log(selected, titleIndex)
-
-    if (titleIndex < 0) selected?.push(title.id);
-    else selected?.splice(titleIndex, 1);
-
-    console.log(selected)
+    $cl.list.edit.selected[$cl.list.edit.selected.has(title.id) ? 'delete' : 'add'](title.id);
 }
 
 async function onDeleteTitles() {
-    $lists.deleteTitles($lists.selectedList?.editMode?.selected || []);
+    if (!$cl.list) return;
 
-    $lists.selectedList!.editMode.selected = [];
+    $cl.delete('title', ...$cl.list.edit.selected);
+
+    $cl.list!.edit.selected.clear();
 }
 
 async function onMoveTitles(categoryId: number) {
-    $lists.moveTitles($lists.selectedList?.editMode?.selected || [], categoryId);
+    if (!$cl.list) return;
 
-    $lists.selectedList!.editMode.selected = [];
+    $cl.moveTitles([...$cl.list.edit.selected], categoryId);
+
+    $cl.list!.edit.selected.clear();
 }
+
+
+
+onMounted(() => {
+    if (isNaN(categoryId)) return;
+
+    $cl.select('category', categoryId);
+});
+
+
+definePageMeta({
+    name: 'user-lists-category'
+});
 
 
 </script>
@@ -175,16 +211,33 @@ async function onMoveTitles(categoryId: number) {
 
 .toolsbar {
     display: flex;
-    margin-bottom: 8px;
+    padding: 8px 0;
+    position: sticky;
+    top: 0;
+    left: 0px;
     align-items: center;
+    background-color: var(--background);
     gap: 12px;
+    z-index: 10;
 }
 
 .grid-titles {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
+    z-index: 2;
 }
+
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: all .2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
 
 @media (max-width: 840px) {
     .grid-titles {

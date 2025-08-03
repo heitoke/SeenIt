@@ -10,7 +10,7 @@
             </DialogHeader>
             <div class="grid gap-4">
                 <div class="grid grid-cols-4 items-center gap-4">
-                    <Label for="name" class="text-right">{{ fieldText || 'Name' }}</Label>
+                    <Label for="name" class="text-right">{{ fieldText || $t('name') }}</Label>
                     <Input id="name" v-model="name" class="col-span-3" />
                 </div>
             </div>
@@ -19,7 +19,7 @@
                     <Button :disabled="!name"
                         type="submit"
                         @click="$emit('save', { name })"
-                    >{{ btnText || 'Save' }}</Button>
+                    >{{ btnText || $t('save') }}</Button>
                 </DialogClose>
             </DialogFooter>
         </DialogContent>

@@ -1,3 +1,40 @@
 {
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "langs": "Languages",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "signIn": "Sign In",
+    "auth": {
+        "title": "Authorization in SeenIt",
+        "description": "Using the services below, log in to SeenIt and use it as you like."
+    },
+    "logOut": "Log out",
+    "movie": "Movie",
+    "tv": "TV",
+    "selectList": "Select list",
+    "searchTitle": "Search title",
+    "search": "Search",
+    "searchTmdb": {
+        "description": "For a better search, it is recommended to select a movie or TV series category"
+    },
+    "createNewList": "Create new list",
+    "createNewCategory": "Create new category",
+    "liked": "Liked",
+    "unliked": "Unliked",
+    "moveTo": "Move to",
+    "delete": "Delete",
+    "categoryEmpty": {
+        "title": "So far, it's empty",
+        "description": "Find what you want to add to the category..."
+    },
+    "action": "Action",
+    "addTitles": "Add titles",
+    "nameTitle": "Name title",
+    "name": "Name",
+    "save": "Save",
+    "notFoundUser": {
+        "title": "Couldn't find the user",
+        "description": "You may have specified the wrong userId, or the user may not exist :("
+    }
 }

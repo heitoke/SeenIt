@@ -14,7 +14,6 @@ export default defineEventHandler(async (event) => {
 
     const result = [];
 
-    console.log(bodyTitles)
     for (const title of bodyTitles) {
         const { data, error } = await client.from('titles')
             .upsert({

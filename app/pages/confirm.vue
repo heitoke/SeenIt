@@ -4,11 +4,16 @@
 
 <script lang="ts" setup>
 
+// * Stores
+import { useListsStore } from '~/stores/lists';
+
+
 const $user = useSupabaseUser();
 
-watch($user, () => {
+
+watch($user, async () => {
     if ($user.value) {
-        return navigateTo('/');
+        return navigateTo(`/users/${$user.value?.id}/lists`);
     }
 }, { immediate: true });
 

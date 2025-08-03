@@ -9,7 +9,7 @@
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent class="w-56">
-                <DropdownMenuLabel>Languages</DropdownMenuLabel>
+                <DropdownMenuLabel>{{ $t('langs') }}</DropdownMenuLabel>
                 <DropdownMenuSeparator/>
                 <DropdownMenuRadioGroup @update:model-value="setLocale($event as any)" :model-value="locale">
                     <DropdownMenuRadioItem v-for="locale in locales" :key="locale.code"
