@@ -9,17 +9,18 @@ export default defineEventHandler(async (event) => {
     const $user = await serverSupabaseUser(event);
     const client = await serverSupabaseClient<Database>(event);
 
-    const listId = await getRouterParam(event, 'listId');
+    const categoryId = await getRouterParam(event, 'categoryId');
 
     const { name, private: privateMode } = await readBody(event) as Pick<List, 'name' | 'private'>;
 
-    const { data, error } = await client.from('lists')
+    const { data, error } = await client.from('categories')
         .update({
             name,
             private: privateMode
         })
-        .eq('id', listId)
-        .select('id, name, created_at')
+        .eq('id', categoryId)
+        .eq('list.user_id', $user?.id)
+        .select('*, list:lists (*)')
         .single();
 
     if (error) {

@@ -1,6 +1,9 @@
 import tailwindcss from '@tailwindcss/vite';
 
 
+import { languages, type CodeName } from './types/locale';
+
+
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     css: ['~/assets/styles/tailwind.css'],
@@ -41,10 +44,13 @@ export default defineNuxtConfig({
     i18n: {
         strategy: 'no_prefix',
         defaultLocale: 'en',
-        locales: [
-            { code: 'en', name: 'English', file: 'en.json' },
-            { code: 'ru', name: 'Russian', file: 'ru.json' }
-        ]
+        locales: Object.keys(languages).map((code) => {
+            return {
+                code,
+                name: languages[code as CodeName].name,
+                file: code + '.json'
+            }
+        })
     },
     devtools: { enabled: true },
     pwa: {

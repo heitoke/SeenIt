@@ -6,26 +6,26 @@ export default defineEventHandler(async (event) => {
     const $user = await serverSupabaseUser(event);
     const client = await serverSupabaseClient<Database>(event);
 
-    const userId = getRouterParam(event, 'id');
+    const titleId = getRouterParam(event, 'titleId');
 
-    const isAuthUser = $user?.id === userId;
+    // const isAuthUser = $user?.id === userId;
 
-    let query = client
-        .from('lists')
+    const { data: lists, error: errorLists } = await client
+        .from('titles')
         .select(`*, categories(*, titles (*, title:tmdb_titles (data, media_type, updated_at)))`)
-        .eq('user_id', userId)
+        .eq('id', titleId)
         .order('created_at', { ascending: true })
         .order('created_at', { ascending: true, referencedTable: 'categories' })
         .order('created_at', { ascending: true, referencedTable: 'categories.titles' })
     
-    if (!isAuthUser) {
-        query = query
-            .eq('private', false)
-            .not('categories.private', 'eq', true)
-            .not('categories.titles.private', 'eq', true)
-    }
+    // if (!isAuthUser) {
+    //     query = query
+    //         .eq('private', false)
+    //         .not('categories.private', 'eq', true)
+    //         .not('categories.titles.private', 'eq', true)
+    // }
 
-    const { data: lists, error: errorLists } = await query;
+    // const { data: lists, error: errorLists } = await query;
 
     if (errorLists) {
         throw createError({ statusMessage: errorLists.message });

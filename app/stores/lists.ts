@@ -15,6 +15,8 @@ class CacheList {
 
     private _selectedListAndCategory = reactive<[number, number]>([-1, -1]);
 
+    alreadyLoadData: boolean = false;
+
     constructor(userId: string) {
         this.userId = userId;
     }
@@ -83,6 +85,7 @@ class CacheList {
         const _this = this;
         return {
             id: dbList.id,
+            private: dbList.private,
             name: dbList.name,
             get categories() {
                 return _this.categories.filter(c => c.listId === dbList.id);
@@ -98,7 +101,7 @@ class CacheList {
                     return _this.toggleEditMode(dbList.id);
                 }
             },
-            update(newList: Pick<List, 'name'>) {
+            update(newList: Pick<List, 'name' | 'private'>) {
                 return _this.updateList(this.id, newList);
             },
             delete() {
@@ -112,6 +115,7 @@ class CacheList {
 
         const data: Category = {
             id: dbCategory.id,
+            private: dbCategory.private,
             name: dbCategory.name,
             listId: dbCategory.list_id,
             get list() {
@@ -124,11 +128,18 @@ class CacheList {
 
             filters: {
                 text: '',
+                options: {},
                 get titles() {
                     const regex = new RegExp(this.text, 'ig');
 
                     return data.titles.filter(t => regex.test(t.data.name) || regex.test(t.data.title) || regex.test(t.data.original_name) || regex.test(t.data.original_title));
                 }
+            },
+            update(newCategory: Pick<Category, 'name' | 'private'>) {
+                return _this.updateCategory(this.id, newCategory);
+            },
+            delete() {
+                return _this.deleteCategory(this.id);
             }
         }
 
@@ -139,6 +150,8 @@ class CacheList {
         const _this = this;
         return {
             id: dbTitle.id,
+            private: dbTitle.private,
+            rating: dbTitle.rating,
             data: {
                 ...dbTitle.title.data,
                 mediaType: dbTitle.title.media_type,
@@ -152,8 +165,11 @@ class CacheList {
             updatedAt: new Date(dbTitle.updated_at),
             createdAt: new Date(dbTitle.created_at),
 
-            like() {
-                _this.likeTitles([this.id], !this.liked);
+            like(num: number = 1) {
+                _this.likeTitles([this.id], num);
+            },
+            setPrivate(bool) {
+                _this.privateTitles([this.id], bool);
             },
             move(newCategoryId) {
                 _this.moveTitles([this.id], newCategoryId);
@@ -174,6 +190,7 @@ class CacheList {
 
         const likedCategory = this.convertCategory({
             id: 0,
+            private: false,
             list_id: 0,
             name: 'Liked',
             created_at: new Date().toISOString()
@@ -182,30 +199,39 @@ class CacheList {
         this.categories.push({
             ...likedCategory,
             get titles() {
-                return _this.titles.filter(t => t.category?.listId === _this.list?.id && t.liked === true);
+                return _this.titles.filter(t => t.category?.listId === _this.list?.id && t.liked > 0);
             },
             get list() {
                 return null;
-            }
+            },
+            filters: {
+                text: '',
+                options: {},
+                get titles() {
+                    const regex = new RegExp(this.text, 'ig');
+
+                    return _this.titles.filter(t => t.category?.listId === _this.list?.id && t.liked > 0 && (regex.test(t.data.name) || regex.test(t.data.title) || regex.test(t.data.original_name) || regex.test(t.data.original_title)));
+                }
+            },
         });
 
-        const data = await $fetch<{
-            lists: Array<DBList>,
-            categories: Array<DBCategory>,
-            titles: Array<DBTitle>
-        }>(`/api/users/${this.userId}/data`);
+        const lists = await $fetch<Array<DBList & { categories: Array<DBCategory & { titles: Array<DBTitle> }> }>>(`/api/users/${this.userId}/data`);
 
-        for (const dbList of data.lists) {
+        if (!lists?.length) return;
+
+        for (const dbList of lists) {
             this.lists.push(this.convertList(dbList));
+
+            for (const dbCategory of dbList.categories) {
+                this.categories.push(this.convertCategory(dbCategory));
+
+                for (const dbTitle of dbCategory.titles) {
+                    this.titles.push(this.convertTitle(dbTitle));
+                }
+            }
         }
 
-        for (const dbCategory of data.categories) {
-            this.categories.push(this.convertCategory(dbCategory));
-        }
-
-        for (const dbTitle of data.titles) {
-            this.titles.push(this.convertTitle(dbTitle));
-        }
+        this.alreadyLoadData = true;
     }
 
 
@@ -298,7 +324,7 @@ class CacheList {
             body: {
                 action: 'move',
                 ids,
-                categoryId: newCategoryId
+                value: newCategoryId
             },
             method: 'PUT'
         });
@@ -311,14 +337,36 @@ class CacheList {
             title.categoryId = newCategoryId;
         }
     }
-
-    async likeTitles(ids: Array<Number>, liked: boolean = true) {
+    
+    async privateTitles(ids: Array<Number>, privateMode: boolean = true) {
         if (!ids.length) return null;
 
         const data = await $fetch(`/api/titles`, {
             body: {
-                action: liked ? 'like' : 'unlike',
-                ids
+                action: 'private',
+                ids,
+                value: privateMode
+            },
+            method: 'PUT'
+        });
+
+        if (!data?.success) return;
+
+        for (const title of this.titles) {
+            if (!ids.includes(title.id)) continue;
+
+            title.private = privateMode;
+        }
+    }
+
+    async likeTitles(ids: Array<Number>, liked: number = 0) {
+        if (!ids.length) return null;
+
+        const data = await $fetch(`/api/titles`, {
+            body: {
+                action: 'like',
+                ids,
+                value: liked
             },
             method: 'PUT'
         });
@@ -333,14 +381,15 @@ class CacheList {
     }
 
 
-    async updateList(listId: number, newList: Pick<List, 'name'>) {
+    async updateList(listId: number, newList: Pick<List, 'name' | 'private'>) {
         const list = this.get('list', listId);
 
         if (!list) return false;
 
-        const data = await $fetch<{ name: string }>(`/api/lists/${list.id}`, {
+        const data = await $fetch<DBList>(`/api/lists/${list.id}`, {
             body: {
-                name: newList.name
+                name: newList.name,
+                private: newList.private
             },
             method: 'PATCH'
         });
@@ -348,10 +397,10 @@ class CacheList {
         if (!data) return false;
 
         list.name = data.name;
+        list.private = data.private;
 
         return true;
     }
-
 
     async deleteList(listId: number) {
         const list = this.get('list', listId);
@@ -375,6 +424,50 @@ class CacheList {
         const lists = this.lists.filter(l => l.id !== listId);
         this.lists.length = 0;
         this.lists.push(...lists);
+
+        return true;
+    }
+
+
+    async updateCategory(categoryId: number, newCategory: Pick<Category, 'name' | 'private'>) {
+        const category = this.get('category', categoryId);
+
+        if (!category) return false;
+
+        const data = await $fetch<DBList>(`/api/categories/${category.id}`, {
+            body: {
+                name: newCategory.name,
+                private: newCategory.private
+            },
+            method: 'PATCH'
+        });
+
+        if (!data) return false;
+
+        category.name = data.name;
+        category.private = data.private;
+
+        return true;
+    }
+
+    async deleteCategory(categoryId: number) {
+        const category = this.get('category', categoryId);
+
+        if (!category) return false;
+
+        const data = await $fetch<{ name: string }>(`/api/categories/${category.id}`, {
+            method: 'DELETE'
+        });
+
+        if (!data) return false;
+
+        const titles = this.titles.filter(t => t.category?.id !== categoryId);
+        this.titles.length = 0;
+        this.titles.push(...titles);
+
+        const categories = this.categories.filter(c => c.id !== categoryId);
+        this.categories.length = 0;
+        this.categories.push(...categories);
 
         return true;
     }
@@ -415,6 +508,33 @@ export const useListsStore = defineStore('lists', () => {
             cacheLists.delete(id);
 
             return true;
+        },
+
+        getByTypeId(type: 'list' | 'category' | 'title', id: number) {
+            let cacheList: CacheList | null = null;
+
+            cacheLists.forEach((cl, userId) => {
+                const index = cl[type === 'list' ? 'lists' : (type === 'title' ? 'titles' : 'categories')].findIndex(t => t.id === id);
+
+                if (index < 0) return;
+
+                cacheList = cl;
+            });
+
+            return cacheList;
+        },
+        getTypeById(type: 'list' | 'category' | 'title', id: number) {
+            let dataType: any | null = null;
+
+            cacheLists.forEach((cl, userId) => {
+                const data = cl[type === 'list' ? 'lists' : (type === 'title' ? 'titles' : 'categories')].find(t => t.id === id);
+
+                if (!data) return;
+
+                dataType = data;
+            });
+
+            return dataType;
         }
     }
 });

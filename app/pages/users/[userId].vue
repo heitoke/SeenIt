@@ -10,6 +10,10 @@ const $route = useRoute();
 
 
 onMounted(() => {
+    const { listId, categoryId } = $route.params;
+
+    if (listId || categoryId) return;
+
     navigateTo(`/u/${$route.params?.userId}/lists`);
 });
 

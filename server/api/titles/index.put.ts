@@ -5,22 +5,37 @@ import { serverSupabaseClient } from '#supabase/server';
 export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient<Database>(event);
     
-    const { action, ids, categoryId } = await readBody(event) as { action: 'like' | 'unlike' | 'move', ids: Array<number>, categoryId: number };
+    const { action, ids, value } = await readBody(event) as { action: 'like' | 'private' | 'move', ids: Array<number>, value: number | string | boolean };
 
     if (action === 'move') {
         const { data, error } = await client.from('titles')
             .update({
-                category_id: categoryId
+                category_id: Number(value)
             })
             .in('id', ids);
 
         if (error) {
             throw createError({ statusMessage: error.message });
         }
-    } else if (action === 'like' || action === 'unlike') {
+    } else if (action === 'like') {
         const { data, error } = await client.from('titles')
             .update({
-                liked: action === 'like'
+                liked: Number(value)
+            })
+            .in('id', ids);
+
+        if (error) {
+            throw createError({ statusMessage: error.message });
+        }
+
+        return {
+            success: true,
+            result: false
+        }
+    } else if (action === 'private') {
+        const { data, error } = await client.from('titles')
+            .update({
+                private: Boolean(value)
             })
             .in('id', ids);
 

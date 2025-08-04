@@ -8,11 +8,17 @@
                 @save="async ($event) => {
                     $event.loading(true);
 
-                    const r = await addTitles($event.titles);
+                    try {
+                        const r = await addTitles($event.titles);
+
+                        if (r) $event.close();
+                    } catch (error) {
+                        console.log(error)
+                    }
 
                     $event.loading(false);
 
-                    if (r) $event.close();
+                    
                 }"
             >
                 <Button class="add">
@@ -55,13 +61,29 @@
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuItem @click="$cl.likeTitles([...$cl.list!.edit.selected], true)">
-                                            <Heart/>
-                                            <span>{{ $t('liked') }}</span>
+                                        <DropdownMenuItem v-for="(_, i) of new Array(5)" :key="i"
+                                            @click="$cl.likeTitles([...$cl.list!.edit.selected], i)"
+                                        >
+                                            <Heart v-if="i > 0"/>
+                                            <HeartOff v-else/>
+                                            <span>{{ $t(i > 0 ? 'liked' : 'unliked') }} - {{ i }}</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="$cl.likeTitles([...$cl.list!.edit.selected], false)">
-                                            <HeartOff/>
-                                            <span>{{ $t('unliked') }}</span>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                            </DropdownMenuSub>
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
+                                    <span>{{ $t('privateMode') }}</span>
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem @click="$cl.privateTitles([...$cl.list!.edit.selected], false)">
+                                            <Eye/>
+                                            <span>{{ $t('publicMode') }}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem @click="$cl.privateTitles([...$cl.list!.edit.selected], true)">
+                                            <EyeOff/>
+                                            <span>{{ $t('privateMode') }}</span>
                                         </DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
@@ -124,7 +146,7 @@
 import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
 import TitleCard from '~/components/TitleCard.vue';
 
-import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff } from 'lucide-vue-next';
+import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff } from 'lucide-vue-next';
 
 // * Stores
 import { useListsStore } from '~/stores/lists';
@@ -170,7 +192,7 @@ async function addTitles(titles: Array<TMDBTitleInSearch>) {
 
 
 function onClickTitle(title: Title) {
-    if (!$cl.list || !$cl.list?.edit.enabled) return;
+    if (!$cl.list || !$cl.list?.edit.enabled) return navigateTo(`/titles/${title.id}`);
 
     $cl.list.edit.selected[$cl.list.edit.selected.has(title.id) ? 'delete' : 'add'](title.id);
 }

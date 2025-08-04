@@ -3,16 +3,16 @@
         <DialogTrigger as-child>
             <slot/>
         </DialogTrigger>
-        <DialogContent class="sm:max-w-[425px]" v-if="list">
+        <DialogContent class="sm:max-w-[425px]" v-if="category">
             <DialogHeader>
-                <DialogTitle>{{ list?.name }}</DialogTitle>
+                <DialogTitle>{{ category?.name }}</DialogTitle>
                 <DialogDescription></DialogDescription>
             </DialogHeader>
 
-            <Input v-model="list.name"/>
+            <Input v-model="category.name"/>
 
             <div class="flex items-center space-x-2">
-                <Switch id="airplane-mode" v-model="list.private"/>
+                <Switch id="airplane-mode" v-model="category.private"/>
                 <Label for="airplane-mode">{{ $t('privateMode') }}</Label>
             </div>
 
@@ -43,7 +43,7 @@ import { Save, Trash } from 'lucide-vue-next';
 import { useListsStore } from '~/stores/lists';
 
 // * Types
-import type { List } from '~~/types/list';
+import type { Category, List } from '~~/types/list';
 
 
 const $lists = useListsStore();
@@ -51,33 +51,33 @@ const $lists = useListsStore();
 
 const props = defineProps<{
     userId: string;
-    listId: number;
+    categoryId: number;
 }>();
 
 
 const open = ref(false);
-const list = ref<List>();
+const category = ref<Category>();
 
 
 function onOpen(bool: boolean) {
-    if (!bool || !props.userId || !props.listId) return;
+    if (!bool || !props.userId || !props.categoryId) return;
 
     const $cl = $lists.get(props.userId)!;
 
-    const l = $cl.get('list', props.listId);
+    const c = $cl.get('category', props.categoryId);
 
-    if (!l) return;
+    if (!c) return;
 
-    list.value = { ...l };
+    category.value = { ...c };
 }
 
 
 async function onSaveList() {
-    if (!list.value) return;
+    if (!category.value) return;
 
-    const { name, private: privateMode } = list.value;
+    const { name, private: privateMode } = category.value;
 
-    const r = await list.value.update!({ name, private: privateMode });
+    const r = await category.value.update!({ name, private: privateMode });
 
     if (!r) return;
 
@@ -85,9 +85,9 @@ async function onSaveList() {
 }
 
 async function onDeleteList() {
-    if (!list.value) return;
+    if (!category.value) return;
 
-    const r = await list.value.delete!();
+    const r = await category.value.delete!();
 
     if (!r) return;
 

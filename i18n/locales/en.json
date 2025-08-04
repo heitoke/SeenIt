@@ -18,6 +18,7 @@
     "searchTmdb": {
         "description": "For a better search, it is recommended to select a movie or TV series category"
     },
+    "selected": "Selected",
     "createNewList": "Create new list",
     "createNewCategory": "Create new category",
     "liked": "Liked",
@@ -37,5 +38,7 @@
         "title": "Couldn't find the user",
         "description": "You may have specified the wrong userId, or the user may not exist :("
     },
-    "pleaseWait": "Please wait"
+    "pleaseWait": "Please wait",
+    "privateMode": "Private mode",
+    "publicMode": "Public mode"
 }

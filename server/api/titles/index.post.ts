@@ -13,7 +13,7 @@ interface Body {
         mediaType: 'movie' | 'tv';
     }>;
     language: string;
-    liked: boolean;
+    liked: number;
 }
 
 
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     const client = await serverSupabaseClient<Database>(event);
     const config = useRuntimeConfig(event);
 
-    const { categoryId, titles, language = 'en-US', liked = false } = await readBody(event) as Body;
+    const { categoryId, titles, language = 'en-US', liked = 0 } = await readBody(event) as Body;
 
     const { data: dataCategory, error: errorCategory } = await client.from('categories').select('*, list:lists (*)').eq('id', categoryId);
 

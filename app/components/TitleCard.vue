@@ -6,7 +6,31 @@
             >
                 <div class="image">
                     <div class="media">{{ $t(data?.mediaType) }}</div>
-                    <div :class="['like', { active: title.liked }]"><Heart :size="14"/></div>
+                    
+                    <div class="badges">
+                        <div @click.prevent.stop="" v-if="title?.private">
+                            <EyeOff :size="14"/>
+                        </div>
+
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger as-child>
+                                    <div><Heart :size="14" :style="title.liked > 0 ? `fill: red; stroke: red; opacity: ${0.5 + (0.1 * title.liked)};` : ''"/></div>
+                                </TooltipTrigger>
+                                <TooltipContent class="flex items-center p-0 overflow-hidden border-r-2">
+                                    <div v-for="(_, i) of new Array(5)" :key="i"
+                                        class="cursor-pointer flex items-center justify-center p-2"
+
+                                        @click="title.like(i)"
+                                    >
+                                        <Heart :size="14" v-if="i > 0" :style="`fill: red; stroke: red; opacity: ${0.5 + (0.1 * i)};`"/>
+                                        <HeartOff :size="14" v-else/>
+                                    </div>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+
                     <img :src="titlePoster" alt="Title Poster">
                 </div>
 
@@ -29,36 +53,63 @@
             </div>
         </ContextMenuTrigger>
         <ContextMenuContent class="w-56" v-if="!disableContextMenu">
-            <ContextMenuItem @click="title.like()">
-                <Heart v-show="!title.liked"/>
-                <HeartOff v-show="title.liked"/>
-
-                <span>{{ title.liked ? 'Unliked' : 'Liked' }}</span>
-            </ContextMenuItem>
             <ContextMenuSub>
                 <ContextMenuSubTrigger>
-                    Move to...
+                    <Heart/>
+                    <span>{{ $t('liked') }}</span>
                 </ContextMenuSubTrigger>
-                <ContextMenuSubContent class="w-48">
-                    <!-- <ContextMenuSub v-for="list of $lists.lists" :key="list.id">
+                <ContextMenuSubContent>
+                    <ContextMenuItem v-for="(_, i) of new Array(5)" :key="i"
+                        @click="title.like(i)"
+                    >
+                        <Heart v-if="i > 0"/>
+                        <HeartOff v-else/>
+                        <span>{{ $t(i > 0 ? 'liked' : 'unliked') }} - {{ i }}</span>
+                    </ContextMenuItem>
+                </ContextMenuSubContent>
+            </ContextMenuSub>
+
+            <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                    <span>{{ $t('privateMode') }}</span>
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent>
+                    <ContextMenuItem @click="title.setPrivate(false)">
+                        <Eye/>
+                        <span>{{ $t('publicMode') }}</span>
+                    </ContextMenuItem>
+                    <ContextMenuItem @click="title.setPrivate(true)">
+                        <EyeOff/>
+                        <span>{{ $t('privateMode') }}</span>
+                    </ContextMenuItem>
+                </ContextMenuSubContent>
+            </ContextMenuSub>
+    
+            <ContextMenuSub>
+                <ContextMenuSubTrigger>
+                    <span>{{ $t('moveTo') }}...</span>
+                </ContextMenuSubTrigger>
+                <ContextMenuSubContent>
+                    <ContextMenuSub v-for="list of $cl.lists" :key="list.id">
                         <ContextMenuSubTrigger>
-                            {{ list.name }}
+                            <span>{{ list.name }}</span>
                         </ContextMenuSubTrigger>
-                        <ContextMenuSubContent class="w-48">
+                        <ContextMenuSubContent>
                             <ContextMenuItem v-for="category of list.categories" :key="category.id"
                                 @click="title.move(category.id)"
                             >
-                                {{ category.name }}
+                                <span>{{ category.name }}</span>
                             </ContextMenuItem>
                         </ContextMenuSubContent>
-                    </ContextMenuSub> -->
+                    </ContextMenuSub>
                 </ContextMenuSubContent>
             </ContextMenuSub>
+
             <ContextMenuSeparator />
             <ContextMenuItem @click="title.delete()">
                 <Trash/>
 
-                <span>Delete</span>
+                <span>{{ $t('delete') }}</span>
             </ContextMenuItem>
         </ContextMenuContent>
     </ContextMenu>
@@ -66,7 +117,7 @@
 
 <script lang="ts" setup>
 
-import { Trash, Heart, HeartOff, Timer, Star } from 'lucide-vue-next';
+import { Trash, Heart, HeartOff, Timer, Star, Eye, EyeOff } from 'lucide-vue-next';
 
 // * Stores
 import { useListsStore } from '~/stores/lists';
@@ -75,10 +126,13 @@ import { useListsStore } from '~/stores/lists';
 import type { Title } from '~~/types/list';
 
 
-const $url = useRequestURL();
+const $route = useRoute();
 
 
 const $lists = useListsStore();
+
+
+const $cl = $lists.get(String($route.params?.userId));
 
 
 const props = defineProps<{
@@ -146,28 +200,33 @@ const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/orig
             z-index: 2;
         }
 
-        .like {
-            cursor: pointer;
+        .badges {
             display: flex;
-            width: 24px;
-            height: 24px;
             position: absolute;
             top: 4px;
             right: 4px;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            background-color: #00000045;
-            backdrop-filter: blur(5px);
-            user-select: none;
-            z-index: 2;
+            gap: 4px;
 
-            &:active {
-                transform: scale(0.95);
-            }
+            div {
+                cursor: pointer;
+                display: flex;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                align-items: center;
+                justify-content: center;
+                background-color: #00000045;
+                backdrop-filter: blur(5px);
+                user-select: none;
+                z-index: 2;
 
-            &.active {
-                color: red;
+                &:active {
+                    transform: scale(0.95);
+                }
+
+                &.active {
+                    color: red;
+                }
             }
         }
 

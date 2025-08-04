@@ -65,7 +65,7 @@
                     @click="selectCategory(0)"
                 >
                     <Heart/>
-                    <span>{{ $t('liked') }}</span>
+                    <span>{{ $t('liked') }} ({{ $cl.get('category', 0)?.titles?.length }})</span>
                 </Button>
 
                 <Button v-for="category of $cl.list?.categories" :key="category.id"
@@ -74,8 +74,17 @@
                     @click="selectCategory(category.id)"
                 >
                     <div>
-                        <div>{{ category.name }}</div>
+                        <div>{{ category.name }} ({{ category.titles.length }})</div>
+                        <div style="font-size: 10px;" v-if="$cl.list.edit.enabled && category.titles.filter(t => $cl.list!.edit.selected.has(t.id)).length > 0">
+                            {{ $t('selected') }} {{ category.titles.filter(t => $cl.list!.edit.selected.has(t.id)).length }}
+                        </div>
                     </div>
+
+                    <CategorySettings :userId="userId" :categoryId="category.id">
+                        <div class="icon absolute right-2 opacity-50 hover:opacity-100"
+                            @click.prevent.stop=""
+                        ><Settings2/></div>
+                    </CategorySettings>
                 </Button>
 
                 <NameField :title="$t('createNewCategory')"
@@ -110,6 +119,7 @@
 // * Components
 import NameField from '~/components/dialogs/NameField.vue';
 import ListSettings from '~/components/dialogs/lists/Settings.vue';
+import CategorySettings from '~/components/dialogs/categories/Settings.vue';
 
 import { Check, ChevronsUpDown, Search, Plus, Heart, Settings2, UserRoundMinus } from 'lucide-vue-next';
 
@@ -178,14 +188,14 @@ onMounted(async () => {
     const listId = Number($route.params?.listId);
     const categoryId = Number($route.params?.categoryId);
 
+    if (!$cl.alreadyLoadData) await $cl.loadUserData();
+
     if (!isNaN(categoryId) && !isNaN(listId)) {
         selectList(listId);
         selectCategory(categoryId)
     } else if (!isNaN(listId)) {
         selectList(listId);
     }
-
-    await $cl.loadUserData();
 
     mode.value = 'ready';
 });
