@@ -7,7 +7,7 @@ import type { TMDBTitleInSearch } from '~~/types/tmdb';
 
 
 class CacheList {
-    readonly userId: string;
+    readonly userId: number;
 
     readonly lists = reactive<Array<List>>([]);
     readonly categories = reactive<Array<Category>>([]);
@@ -17,7 +17,7 @@ class CacheList {
 
     alreadyLoadData: boolean = false;
 
-    constructor(userId: string) {
+    constructor(userId: number) {
         this.userId = userId;
     }
 
@@ -487,13 +487,13 @@ class CacheList {
 
 
 export const useListsStore = defineStore('lists', () => {
-    const cacheLists = new Map<string, CacheList>();
+    const cacheLists = new Map<number, CacheList>();
 
     return {
-        has(id: string) {
+        has(id: number) {
             return cacheLists.has(id);
         },
-        get(id: string): CacheList {
+        get(id: number): CacheList {
             if (cacheLists.has(id)) return cacheLists.get(id)!;
 
             const newCacheList = new CacheList(id);
@@ -502,7 +502,7 @@ export const useListsStore = defineStore('lists', () => {
 
             return newCacheList;
         },
-        remove(id: string) {
+        remove(id: number) {
             if (!cacheLists.has(id)) return true;
 
             cacheLists.delete(id);

@@ -7,39 +7,55 @@
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent class="w-56">
-                <DropdownMenuLabel>@{{ $user.user_metadata.user_name }}</DropdownMenuLabel>
+                <DropdownMenuLabel>{{ $user.user_metadata.name }}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                        <span>{{ $t('profile') }}</span>
-                    </DropdownMenuItem>
-                    <NuxtLink :to="`/u/${$user.id}`">
+                    <NuxtLink :to="`/u/${$user.app_metadata?.public_id}`">
                         <DropdownMenuItem>
+                            <User/>
+
+                            <span>{{ $t('profile') }}</span>
+                        </DropdownMenuItem>
+                    </NuxtLink>
+                    <NuxtLink :to="`/u/${$user.app_metadata?.public_id}/lists`">
+                        <DropdownMenuItem>
+                            <ScrollText/>
+
                             <span>{{ $t('dashboard') }}</span>
                         </DropdownMenuItem>
                     </NuxtLink>
                     <DropdownMenuItem>
+                        <Settings/>
+
                         <span>{{ $t('settings') }}</span>
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem @click="signOut">
+                    <LogOut/>
+                    
                     <span>{{ $t('logOut') }}</span>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
 
         <NuxtLink to="/login" v-else>
-            <Button>{{ $t('signIn') }}</Button>
+            <Button>
+                <ScanFace/>
+
+                <span>{{ $t('signIn') }}</span>
+            </Button>
         </NuxtLink>
     </div>
 </template>
 
 <script lang="ts" setup>
 
+import { User, ScrollText, Settings, LogOut, ScanFace } from 'lucide-vue-next';
+
+
 const $supabase = useSupabaseClient();
 const $user = useSupabaseUser();
-
 
 async function signOut() {
     const { error } = await $supabase.auth.signOut();

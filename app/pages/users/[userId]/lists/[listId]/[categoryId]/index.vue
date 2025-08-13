@@ -1,7 +1,7 @@
 <template>
     <div class="list-titles">
         <div class="toolsbar" v-if="$cl.category">
-            <SearchTMDB
+            <SearchTMDB v-if="$p?.canEdit?.value"
                 :userId="$cl.userId"
                 :listId="$cl.category.list?.id!"
 
@@ -17,8 +17,6 @@
                     }
 
                     $event.loading(false);
-
-                    
                 }"
             >
                 <Button class="add">
@@ -39,13 +37,13 @@
                 </span>
             </div>
 
-            <Toggle :model-value="$cl.list?.edit.enabled"
+            <Toggle :model-value="$cl.list?.edit.enabled" v-if="$p?.canEdit?.value"
                 @click="$cl.list?.edit.toggle()"
             >
                 <Pencil class="h-4 w-4" />
             </Toggle>
 
-            <template v-if="$cl.list?.edit.enabled">
+            <template v-if="$p?.canEdit?.value && $cl.list?.edit.enabled">
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button variant="outline">
@@ -127,6 +125,8 @@
         <div class="grid-titles" v-if="$cl?.category?.titles?.length! > 0">
             <TitleCard v-for="title of $cl.category?.filters.titles" :key="title.id" :title="title"
                 :selected="$cl.list?.edit.enabled && $cl.list?.edit.selected.has(title.id)"
+                :canEditHeart="$p?.canEdit.value"
+                :disableContextMenu="!$p?.canEdit.value"
                 
                 @click="onClickTitle(title as any)"
             />
@@ -144,7 +144,7 @@
 
 // * Components
 import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
-import TitleCard from '~/components/TitleCard.vue';
+import TitleCard from '~/components/modules/titles/Card.vue';
 
 import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff } from 'lucide-vue-next';
 
@@ -152,6 +152,7 @@ import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, 
 import { useListsStore } from '~/stores/lists';
 
 // * Types
+import type { User } from '~~/types/user';
 import type { Title } from '~~/types/list';
 import type { TMDBTitleInSearch } from '~~/types/tmdb';
 
@@ -159,7 +160,11 @@ import type { TMDBTitleInSearch } from '~~/types/tmdb';
 const $route = useRoute();
 
 
-const userId = String($route.params?.userId);
+
+const $p = inject<{ user: User, canEdit: Ref<boolean> }>('user');
+
+
+const userId = $p?.user.id!;
 const categoryId = Number($route.params?.categoryId);
 
 

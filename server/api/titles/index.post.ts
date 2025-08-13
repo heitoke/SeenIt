@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
     const category = dataCategory[0];
 
-    if (category.list.user_id !== $user.id) {
+    if (String(category.list.user_id) !== String($user?.app_metadata?.public_id)) {
         throw createError({
             statusCode: 403,
             statusMessage: 'You don\'t have enough rights'

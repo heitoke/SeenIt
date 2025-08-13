@@ -5,14 +5,11 @@
 
             <p>{{ $t('auth.description') }}</p>
 
-            <Button variant="outline" @click="signInWithOAuth('google')">
-                <img src="https://www.gstatic.com/images/branding/searchlogo/ico/favicon.ico" alt="Google Logo">
-                <span>Google</span>
-            </Button>
-
-            <Button variant="outline" @click="signInWithOAuth('google')">
-                <img src="https://github.githubassets.com/favicons/favicon-dark.png">
-                <span>GitHub</span>
+            <Button variant="outline" v-for="({ name, logoUrl }, key) in providers" :key="key"
+                @click="signInWithOAuth(key)"
+            >
+                <img :src="logoUrl" alt="Logo Provider">
+                <span>{{ name }}</span>
             </Button>
         </main>
     </div>
@@ -20,7 +17,7 @@
 
 <script lang="ts" setup>
 
-import { Github } from 'lucide-vue-next';
+import { providers, type ProviderName } from '~~/types/user';
 
 
 const $supabase = useSupabaseClient();
@@ -34,7 +31,7 @@ if ($user.value?.id) {
 }
 
 
-async function signInWithOAuth(provider: 'google' | 'github') {
+async function signInWithOAuth(provider: ProviderName) {
     const url = useRequestURL();
 
     const { error } = await $supabase.auth.signInWithOAuth({

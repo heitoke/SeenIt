@@ -10,13 +10,11 @@ export default defineEventHandler(async (event) => {
 
     // const isAuthUser = $user?.id === userId;
 
-    const { data: lists, error: errorLists } = await client
+    const { data: title, error: errorTitle } = await client
         .from('titles')
-        .select(`*, categories(*, titles (*, title:tmdb_titles (data, media_type, updated_at)))`)
+        .select(`*, title:tmdb_titles (*), category:categories (*, list:lists (*))`)
         .eq('id', titleId)
-        .order('created_at', { ascending: true })
-        .order('created_at', { ascending: true, referencedTable: 'categories' })
-        .order('created_at', { ascending: true, referencedTable: 'categories.titles' })
+        .single();
     
     // if (!isAuthUser) {
     //     query = query
@@ -27,9 +25,9 @@ export default defineEventHandler(async (event) => {
 
     // const { data: lists, error: errorLists } = await query;
 
-    if (errorLists) {
-        throw createError({ statusMessage: errorLists.message });
+    if (errorTitle) {
+        throw createError({ statusMessage: errorTitle.message });
     }
 
-    return lists;
+    return title;
 });

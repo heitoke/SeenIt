@@ -48,13 +48,6 @@
                         </ul>
                     </div>
                 </li>
-                <!-- <TitleCard v-for="title of listTitles" :key="title.id"
-                    :title="({ data: title } as any)"
-                    :selected="selectedTitles.has(title.id)"
-                    :disable-context-menu="true"
-
-                    @click="selectedTitles.has(title.id) ? selectedTitles.delete(title.id) : selectedTitles.set(title.id, title)"
-                /> -->
             </ul>
 
             <DialogFooter>
@@ -108,7 +101,7 @@ defineEmits({
 
 
 const props = defineProps<{
-    userId: string;
+    userId: number;
     listId: number;
 }>();
 

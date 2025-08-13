@@ -40,5 +40,8 @@
     },
     "pleaseWait": "Please wait",
     "privateMode": "Private mode",
-    "publicMode": "Public mode"
+    "publicMode": "Public mode",
+    "confirmDelete": {
+        "description": "Do you confirm the deletion of this title?"
+    }
 }

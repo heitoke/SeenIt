@@ -40,5 +40,8 @@
     },
     "pleaseWait": "Подождите",
     "privateMode": "Приватный режим",
-    "publicMode": "Публичный режим"
+    "publicMode": "Публичный режим",
+    "confirmDelete": {
+        "description": "Вы подтверждаете удаление данного тайтла?"
+    }
 }

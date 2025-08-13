@@ -8,7 +8,7 @@
                 <ComboboxAnchor as-child>
                     <ComboboxTrigger as-child>
                         <Button variant="outline" class="justify-between" style="width: 100%;">
-                            {{ $cl.list?.name ?? $t('selectList') }}
+                            {{ $cl.list?.name ? `${$cl.list?.name} (${$cl.list.categories.flatMap(c => c.titles).length})` : $t('selectList') }}
 
                             <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -33,9 +33,11 @@
                             :key="list.id"
                             :value="list.id"
                         >
-                            <span class="flex-1 whitespace-nowrap text-ellipsis overflow-hidden">{{ list.name }}</span>
+                            <div class="flex-1">
+                                <span class="whitespace-nowrap text-ellipsis overflow-hidden">{{ list.name }} ({{ list.categories.flatMap(c => c.titles).length }})</span>
+                            </div>
                             
-                            <ListSettings :userId="userId" :listId="list.id">
+                            <ListSettings :userId="user?.id" :listId="list.id" v-if="canEdit">
                                 <div @click.prevent.stop="" class="cursor-pointer opacity-70 hover:opacity-100">
                                     <Settings2/>
                                 </div>
@@ -46,7 +48,7 @@
                             </ComboboxItemIndicator>
                         </ComboboxItem>
 
-                        <NameField
+                        <NameField v-if="canEdit"
                             :title="$t('createNewList')"
                             @save="createNewList($event.name)"
                         >
@@ -80,14 +82,14 @@
                         </div>
                     </div>
 
-                    <CategorySettings :userId="userId" :categoryId="category.id">
+                    <CategorySettings :userId="user?.id" :categoryId="category.id" v-if="canEdit">
                         <div class="icon absolute right-2 opacity-50 hover:opacity-100"
                             @click.prevent.stop=""
                         ><Settings2/></div>
                     </CategorySettings>
                 </Button>
 
-                <NameField :title="$t('createNewCategory')"
+                <NameField :title="$t('createNewCategory')" v-if="canEdit"
                     @save="createNewCategory($event.name)"
                 >
                     <Button variant="ghost">
@@ -99,7 +101,7 @@
         </div>
 
         <main>
-            <NuxtPage/>
+            <NuxtPage :user="user"/>
         </main>
     </div>
 
@@ -126,8 +128,12 @@ import { Check, ChevronsUpDown, Search, Plus, Heart, Settings2, UserRoundMinus }
 // * Stores
 import { useListsStore } from '~/stores/lists';
 
-// *Libs
+// * Libs
 import { cn } from '~/lib/utils';
+
+// * Types
+import type { User } from '~~/types/user';
+
 
 
 const $route = useRoute();
@@ -137,13 +143,24 @@ const $user = useSupabaseUser();
 const $lists = useListsStore();
 
 
+
+const props = defineProps<{
+    user: User;
+    canEdit: boolean;
+}>();
+
+
+
 const mode = ref<'ready' | 'none' | 'no_user'>('none');
 
 
-const userId = String($route.params?.userId);
+provide('user', {
+    user: props.user,
+    canEdit: props.canEdit
+});
 
 
-const $cl = $lists.get(userId);
+const $cl = $lists.get(props?.user?.id);
 
 
 function selectList(listId: number) {
@@ -223,8 +240,9 @@ definePageMeta({
 
 .sidebar {
     display: flex;
+    padding-top: 8px;
     position: sticky;
-    top: 8px;
+    top: 0px;
     left: 0px;
     flex-direction: column;
     gap: 8px;

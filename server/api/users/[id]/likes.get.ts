@@ -11,18 +11,15 @@ export default defineEventHandler(async (event) => {
     const isAuthUser = String($user?.app_metadata?.public_id) === String(userId);
 
     let query = client
-        .from('lists')
-        .select(`*, categories(*, titles (*, title:tmdb_titles (data, media_type, updated_at)))`)
-        .eq('user_id', userId)
+        .from('titles')
+        .select(`*, title:tmdb_titles (data, media_type, updated_at), category:categories (*, list:lists (*))`)
+        .eq('category.list.user_id', userId)
+        .gt('liked', 0)
         .order('created_at', { ascending: true })
-        .order('created_at', { ascending: true, referencedTable: 'categories' })
-        .order('created_at', { ascending: true, referencedTable: 'categories.titles' })
     
     if (!isAuthUser) {
         query = query
             .eq('private', false)
-            .not('categories.private', 'eq', true)
-            .not('categories.titles.private', 'eq', true)
     }
 
     const { data: lists, error: errorLists } = await query;

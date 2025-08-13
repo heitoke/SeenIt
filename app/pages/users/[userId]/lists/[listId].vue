@@ -6,11 +6,14 @@
 
 import { useListsStore } from '~/stores/lists';
 
+// * Types
+import type { User } from '~~/types/user';
+
 
 const $route = useRoute();
 
 
-const userId = String($route.params?.userId);
+const userId = Number($route.params?.userId);
 const listId = Number($route.params?.listId);
 
 

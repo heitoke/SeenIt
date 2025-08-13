@@ -50,7 +50,7 @@ const $lists = useListsStore();
 
 
 const props = defineProps<{
-    userId: string;
+    userId: number;
     categoryId: number;
 }>();
 

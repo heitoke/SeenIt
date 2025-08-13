@@ -2,23 +2,20 @@ import { createError } from 'h3';
 import type { Database } from '~~/types/database.types';
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server';
 
+// * Types
+import type { User } from '~~/types/user';
+
 export default defineEventHandler(async (event) => {
     const $user = await serverSupabaseUser(event);
     const client = await serverSupabaseClient<Database>(event);
 
-    const { name } = await readBody(event) as { name: string };
+    const userId = getRouterParam(event, 'id');
 
-    const { data, error } = await client.from('lists')
-        .upsert({
-            user_id: $user?.app_metadata?.public_id,
-            name,
-        })
-        .select('id, name, created_at')
-        .single();
+    const { data, error } = await client.rpc('get_user_by_id', { user_id: userId });
 
     if (error) {
         throw createError({ statusMessage: error.message });
     }
 
-    return data;
+    return data as User;
 });
