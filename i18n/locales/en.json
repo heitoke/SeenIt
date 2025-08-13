@@ -43,5 +43,6 @@
     "publicMode": "Public mode",
     "confirmDelete": {
         "description": "Do you confirm the deletion of this title?"
-    }
+    },
+    "users": "Users"
 }

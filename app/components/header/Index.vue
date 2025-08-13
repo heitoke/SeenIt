@@ -7,6 +7,10 @@
             </div>
         </NuxtLink>
 
+        <NuxtLink to="/users">
+            <span class="link">{{ $t('users') }}</span>
+        </NuxtLink>
+
         <div style="margin-left: auto;"></div>
 
         <Language/>
@@ -52,6 +56,16 @@ header {
 
     span {
         font-weight: 700;
+    }
+}
+
+.link {
+    font-size: 14px;
+    opacity: .7;
+
+    &:hover {
+        text-decoration: underline;
+        opacity: 1;
     }
 }
 
