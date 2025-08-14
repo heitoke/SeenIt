@@ -34,7 +34,7 @@
                     @click="selectedTitles.has(title.id) ? selectedTitles.delete(title.id) : selectedTitles.set(title.id, title)"
                 >
                     <div class="image">
-                        <img :src="`https://seenit.heito.xyz/api/images/t/p/original/${title?.poster_path}`" alt="">
+                        <img :src="`https://seenit.heito.xyz/api/images/t/p/original/${title?.poster_path}`" v-if="title?.poster_path">
                     </div>
 
                     <div class="details">
@@ -45,12 +45,12 @@
                                 <span>{{ $t(title?.media_type) }}</span>
                             </li>
 
-                            <li>
+                            <li v-if="title?.vote_average > 0">
                                 <Star :size="10" color="yellow"/>
                                 <span>{{ title?.vote_average.toFixed(1) }}</span>
                             </li>
 
-                            <li>
+                            <li v-if="title?.release_date || title?.first_air_date">
                                 <Calendar :size="10"/>
                                 <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
                             </li>
@@ -186,7 +186,6 @@ ul.titles {
         }
 
         &.selected {
-            // border-color: var(--color-red-50);
             background-color: var(--secondary);
 
             .name {
@@ -196,7 +195,8 @@ ul.titles {
 
         .image {
             margin-right: 8px;
-            width: 64px;
+            max-width: 64px;
+            min-width: 64px;
             height: 96px;
             border-radius: 7px;
             background-color: var(--secondary);
