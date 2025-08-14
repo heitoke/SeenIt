@@ -16,6 +16,7 @@ export interface TMDBTitleInSearch {
     vote_average: number;
     vote_count: number;
     origin_country: Array<string>;
+    release_date: string;
 }
 
 export interface TMDBSearch {

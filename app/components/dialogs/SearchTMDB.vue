@@ -28,7 +28,7 @@
             </Tabs>
 
             <ul class="titles">
-                <li v-for="title of listTitles" :key="title.id"
+                <li class="title" v-for="title of listTitles" :key="title.id"
                     :class="{ selected: selectedTitles.has(title.id) }"
 
                     @click="selectedTitles.has(title.id) ? selectedTitles.delete(title.id) : selectedTitles.set(title.id, title)"
@@ -41,9 +41,18 @@
                         <div class="name">{{ title?.title || title?.name }}</div>
 
                         <ul>
+                            <li v-if="type === 'multi'">
+                                <span>{{ $t(title?.media_type) }}</span>
+                            </li>
+
                             <li>
                                 <Star :size="10" color="yellow"/>
                                 <span>{{ title?.vote_average.toFixed(1) }}</span>
+                            </li>
+
+                            <li>
+                                <Calendar :size="10"/>
+                                <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
                             </li>
                         </ul>
                     </div>
@@ -79,7 +88,7 @@
 
 <script lang="ts" setup>
 
-import { Search, Plus, Loader2, Star } from 'lucide-vue-next';
+import { Search, Plus, Loader2, Star, Calendar } from 'lucide-vue-next';
 import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
@@ -150,6 +159,8 @@ function onInput(event: InputEvent) {
         });
 
         titles.value = data.results.filter(t => t?.media_type === 'movie' || t?.media_type === 'tv');
+
+        console.log(titles.value)
     }, 500);
 }
 
@@ -157,11 +168,11 @@ function onInput(event: InputEvent) {
 
 <style lang="scss" scoped>
 
-ul {
+ul.titles {
     max-height: 50vh;
     overflow-x: hidden;
 
-    li {
+    li.title {
         cursor: pointer;
         display: flex;
         padding: 4px;
