@@ -40,13 +40,13 @@
 import { Save, Trash } from 'lucide-vue-next';
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { Category, List } from '~~/types/list';
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
 const props = defineProps<{
@@ -62,9 +62,9 @@ const category = ref<Category>();
 function onOpen(bool: boolean) {
     if (!bool || !props.userId || !props.categoryId) return;
 
-    const $cl = $lists.get(props.userId)!;
+    const $cu = $cacheUsers.get(props.userId)!;
 
-    const c = $cl.get('category', props.categoryId);
+    const c = $cu.get('category', props.categoryId);
 
     if (!c) return;
 

@@ -47,7 +47,7 @@ import TitleHeart from '~/components/modules/titles/Heart.vue';
 import { Heart, Star } from 'lucide-vue-next';
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { Title } from '~~/types/list';
@@ -57,7 +57,7 @@ const $route = useRoute();
 const $router = useRouter();
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
 const title = ref<Title>();
@@ -73,11 +73,11 @@ async function loadTitle(titleId: number) {
 
     if (!data?.id) return;
 
-    const $cl = $lists.get(data.category.list.user_id);
+    const $cu = $cacheUsers.get(data.category.list.user_id);
 
-    if (!$cl.alreadyLoadData) await $cl.loadUserData();
+    if (!$cu.alreadyLoadUser) await $cu.loadUser();
 
-    const t = $lists.getTypeById('title', titleId);
+    const t = $cacheUsers.getTypeById('title', titleId);
 
     title.value = t;
 
@@ -90,7 +90,7 @@ onMounted(() => {
 
     if (isNaN(titleId)) return $router.back();
 
-    const t = $lists.getTypeById('title', titleId);
+    const t = $cacheUsers.getTypeById('title', titleId);
 
     if (!t) return loadTitle(titleId);
 
@@ -100,9 +100,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-
-.page.title {
-}
 
 .header {
     width: 100%;
@@ -203,6 +200,29 @@ onMounted(() => {
     h2 {
         font-size: 24px;
         font-weight: 600;
+    }
+}
+
+
+@media (max-width: 780px) {
+    .header {
+        .badges {
+            top: 12px;
+
+            &.left {
+                left: 12px;
+            }
+
+            &.right {
+                right: 12px;
+            }
+        }
+
+        .details {
+            position: relative;
+            top: auto;
+            left: auto;
+        }
     }
 }
 

@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { User } from '~~/types/user';
@@ -17,7 +17,7 @@ const userId = Number($route.params?.userId);
 const listId = Number($route.params?.listId);
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
 onMounted(() => {
@@ -25,9 +25,9 @@ onMounted(() => {
 
     if (isNaN(listId)) return;
 
-    const $cl = $lists.get(userId);
+    const $cu = $cacheUsers.get(userId);
 
-    $cl.select('list', listId);
+    $cu.select('list', listId);
 });
 
 

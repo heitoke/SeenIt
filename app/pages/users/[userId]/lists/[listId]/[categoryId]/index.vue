@@ -1,9 +1,9 @@
 <template>
     <div class="list-titles">
-        <div class="toolsbar" v-if="$cl.category">
-            <SearchTMDB v-if="$p?.canEdit?.value"
-                :userId="$cl.userId"
-                :listId="$cl.category.list?.id!"
+        <div class="toolsbar" v-if="$cu.category">
+            <SearchTMDB v-if="$cu.canEdit"
+                :userId="$cu.userId"
+                :listId="$cu.category.list?.id!"
 
                 @save="async ($event) => {
                     $event.loading(true);
@@ -28,7 +28,7 @@
 
             <div class="relative w-full max-w items-center" v-if="$route.params?.listId && $route.params?.categoryId">
                 <Input id="search" type="text" :placeholder="`${$t('search')}...`" class="pl-8"
-                    :model-value="$cl.category!.filters.text"
+                    :model-value="$cu.category!.filters.text"
 
                     @update:model-value="onSearchInput(String($event))"
                 />
@@ -37,13 +37,13 @@
                 </span>
             </div>
 
-            <Toggle :model-value="$cl.list?.edit.enabled" v-if="$p?.canEdit?.value"
-                @click="$cl.list?.edit.toggle()"
+            <Toggle :model-value="$cu.list?.edit.enabled" v-if="$cu.canEdit"
+                @click="$cu.list?.edit.toggle()"
             >
                 <Pencil class="h-4 w-4" />
             </Toggle>
 
-            <template v-if="$p?.canEdit?.value && $cl.list?.edit.enabled">
+            <template v-if="$cu.canEdit && $cu.list?.edit.enabled">
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button variant="outline">
@@ -54,13 +54,13 @@
                     <DropdownMenuContent class="w-56">
                         <DropdownMenuGroup>
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
+                                <DropdownMenuSubTrigger :disabled="!$cu.list?.edit.selected.size">
                                     <span>{{ $t('liked') }}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
                                         <DropdownMenuItem v-for="(_, i) of new Array(5)" :key="i"
-                                            @click="$cl.likeTitles([...$cl.list!.edit.selected], i)"
+                                            @click="$cu.likeTitles([...$cu.list!.edit.selected], i)"
                                         >
                                             <Heart v-if="i > 0"/>
                                             <HeartOff v-else/>
@@ -70,16 +70,16 @@
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
+                                <DropdownMenuSubTrigger :disabled="!$cu.list?.edit.selected.size">
                                     <span>{{ $t('privateMode') }}</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuItem @click="$cl.privateTitles([...$cl.list!.edit.selected], false)">
+                                        <DropdownMenuItem @click="$cu.privateTitles([...$cu.list!.edit.selected], false)">
                                             <Eye/>
                                             <span>{{ $t('publicMode') }}</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem @click="$cl.privateTitles([...$cl.list!.edit.selected], true)">
+                                        <DropdownMenuItem @click="$cu.privateTitles([...$cu.list!.edit.selected], true)">
                                             <EyeOff/>
                                             <span>{{ $t('privateMode') }}</span>
                                         </DropdownMenuItem>
@@ -87,12 +87,12 @@
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>
                             <DropdownMenuSub>
-                                <DropdownMenuSubTrigger :disabled="!$cl.list?.edit.selected.size">
+                                <DropdownMenuSubTrigger :disabled="!$cu.list?.edit.selected.size">
                                     <span>{{ $t('moveTo') }}...</span>
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent>
-                                        <DropdownMenuSub v-for="list of $cl.lists" :key="list.id">
+                                        <DropdownMenuSub v-for="list of $cu.lists" :key="list.id">
                                             <DropdownMenuSubTrigger>
                                                 <span>{{ list.name }}</span>
                                             </DropdownMenuSubTrigger>
@@ -111,7 +111,7 @@
                             </DropdownMenuSub>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem :disabled="$cl.list?.edit.selected.size < 1"
+                        <DropdownMenuItem :disabled="$cu.list?.edit.selected.size < 1"
                             @click="onDeleteTitles"
                         >
                             <Trash/>
@@ -122,11 +122,11 @@
             </template>
         </div>
 
-        <div class="grid-titles" v-if="$cl?.category?.titles?.length! > 0">
-            <TitleCard v-for="title of $cl.category?.filters.titles" :key="title.id" :title="title"
-                :selected="$cl.list?.edit.enabled && $cl.list?.edit.selected.has(title.id)"
-                :canEditHeart="$p?.canEdit.value"
-                :disableContextMenu="!$p?.canEdit.value"
+        <div class="grid-titles" v-if="$cu?.category?.titles?.length! > 0">
+            <TitleCard v-for="title of $cu.category?.filters.titles" :key="title.id" :title="title"
+                :selected="$cu.list?.edit.enabled && $cu.list?.edit.selected.has(title.id)"
+                :canEditHeart="$cu.canEdit"
+                :disableContextMenu="!$cu.canEdit"
                 
                 @click="onClickTitle(title as any)"
             />
@@ -149,7 +149,7 @@ import TitleCard from '~/components/modules/titles/Card.vue';
 import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff } from 'lucide-vue-next';
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { User } from '~~/types/user';
@@ -160,18 +160,14 @@ import type { TMDBTitleInSearch } from '~~/types/tmdb';
 const $route = useRoute();
 
 
-
-const $p = inject<{ user: User, canEdit: Ref<boolean> }>('user');
-
-
-const userId = $p?.user.id!;
+const userId = Number($route.params?.userId);
 const categoryId = Number($route.params?.categoryId);
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
-const $cl = $lists.get(userId);
+const $cu = $cacheUsers.get(userId);
 
 
 let timer: NodeJS.Timeout;
@@ -180,42 +176,42 @@ let timer: NodeJS.Timeout;
 function onSearchInput(value: string) {
     clearTimeout(timer);
 
-    if (!$cl.category) return;
+    if (!$cu.category) return;
 
     timer = setTimeout(() => {
-        $cl.category!.filters.text = value;
+        $cu.category!.filters.text = value;
     }, 500);
 }
 
 
 
 async function addTitles(titles: Array<TMDBTitleInSearch>) {
-    if (!titles.length || !$cl.category?.id) return;
+    if (!titles.length || !$cu.category?.id) return;
 
-    return $cl.addTitles(titles, $cl.category?.id);
+    return $cu.addTitles(titles, $cu.category?.id);
 }
 
 
 function onClickTitle(title: Title) {
-    if (!$cl.list || !$cl.list?.edit.enabled) return navigateTo(`/titles/${title.id}`);
+    if (!$cu.list || !$cu.list?.edit.enabled) return navigateTo(`/titles/${title.id}`);
 
-    $cl.list.edit.selected[$cl.list.edit.selected.has(title.id) ? 'delete' : 'add'](title.id);
+    $cu.list.edit.selected[$cu.list.edit.selected.has(title.id) ? 'delete' : 'add'](title.id);
 }
 
 async function onDeleteTitles() {
-    if (!$cl.list) return;
+    if (!$cu.list) return;
 
-    $cl.delete('title', ...$cl.list.edit.selected);
+    $cu.delete('title', ...$cu.list.edit.selected);
 
-    $cl.list!.edit.selected.clear();
+    $cu.list!.edit.selected.clear();
 }
 
 async function onMoveTitles(categoryId: number) {
-    if (!$cl.list) return;
+    if (!$cu.list) return;
 
-    $cl.moveTitles([...$cl.list.edit.selected], categoryId);
+    $cu.moveTitles([...$cu.list.edit.selected], categoryId);
 
-    $cl.list!.edit.selected.clear();
+    $cu.list!.edit.selected.clear();
 }
 
 
@@ -223,7 +219,7 @@ async function onMoveTitles(categoryId: number) {
 onMounted(() => {
     if (isNaN(categoryId)) return;
 
-    $cl.select('category', categoryId);
+    $cu.select('category', categoryId);
 });
 
 

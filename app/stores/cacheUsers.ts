@@ -4,10 +4,12 @@ import type {
     List, Category, Title
 } from '~~/types/list';
 import type { TMDBTitleInSearch } from '~~/types/tmdb';
+import type { User } from '~~/types/user';
 
 
-class CacheList {
+class CacheUser {
     readonly userId: number;
+    private _user = reactive<User>({} as any);
 
     readonly lists = reactive<Array<List>>([]);
     readonly categories = reactive<Array<Category>>([]);
@@ -15,12 +17,23 @@ class CacheList {
 
     private _selectedListAndCategory = reactive<[number, number]>([-1, -1]);
 
-    alreadyLoadData: boolean = false;
+    alreadyLoadUser: boolean = false;
+    alreadyLoadUserData: boolean = false;
 
     constructor(userId: number) {
         this.userId = userId;
     }
 
+
+    get user(): User | null {
+        return this._user || null;
+    }
+
+    get canEdit(): boolean {
+        const $user = useSupabaseUser();
+
+        return $user?.value?.app_metadata?.public_id === this.user?.id;
+    }
 
     get list(): List | null {
         return this.lists.find(l => l.id === this._selectedListAndCategory[0]) || null;
@@ -181,7 +194,35 @@ class CacheList {
     }   
 
 
-    async loadUserData() {
+    async loadUser() {
+        const $user = useSupabaseUser();
+        
+        if ($user.value && $user.value?.app_metadata?.public_id === this.userId) {
+            const { id, app_metadata, user_metadata, created_at } = $user.value;
+
+            this._user = {
+                id: app_metadata?.public_id,
+                uid: id,
+                user: {
+                    ...user_metadata,
+                    providers: app_metadata?.providers
+                } as User['user'],
+                created_at
+            }
+        } else {
+            const user = await $fetch<User>(`/api/users/${this.userId}`);
+
+            if (!user?.id) return;
+
+            this._user = user;
+        }
+
+        this.alreadyLoadUser = true;
+
+        await this.loadUserData();
+    }
+
+    private async loadUserData() {
         const _this = this;
 
         this.lists.length = 0;
@@ -231,7 +272,7 @@ class CacheList {
             }
         }
 
-        this.alreadyLoadData = true;
+        this.alreadyLoadUserData = true;
     }
 
 
@@ -486,47 +527,47 @@ class CacheList {
 }
 
 
-export const useListsStore = defineStore('lists', () => {
-    const cacheLists = new Map<number, CacheList>();
+export const useCacheUsersStore = defineStore('cache-users', () => {
+    const CacheUsers = new Map<number, CacheUser>();
 
     return {
         has(id: number) {
-            return cacheLists.has(id);
+            return CacheUsers.has(id);
         },
-        get(id: number): CacheList {
-            if (cacheLists.has(id)) return cacheLists.get(id)!;
+        get(id: number): CacheUser {
+            if (CacheUsers.has(id)) return CacheUsers.get(id)!;
 
-            const newCacheList = new CacheList(id);
+            const newCacheUser = new CacheUser(id);
 
-            cacheLists.set(id, newCacheList);
+            CacheUsers.set(id, newCacheUser);
 
-            return newCacheList;
+            return newCacheUser;
         },
         remove(id: number) {
-            if (!cacheLists.has(id)) return true;
+            if (!CacheUsers.has(id)) return true;
 
-            cacheLists.delete(id);
+            CacheUsers.delete(id);
 
             return true;
         },
 
         getByTypeId(type: 'list' | 'category' | 'title', id: number) {
-            let cacheList: CacheList | null = null;
+            let CacheUser: CacheUser | null = null;
 
-            cacheLists.forEach((cl, userId) => {
+            CacheUsers.forEach((cl, userId) => {
                 const index = cl[type === 'list' ? 'lists' : (type === 'title' ? 'titles' : 'categories')].findIndex(t => t.id === id);
 
                 if (index < 0) return;
 
-                cacheList = cl;
+                CacheUser = cl;
             });
 
-            return cacheList;
+            return CacheUser;
         },
         getTypeById(type: 'list' | 'category' | 'title', id: number) {
             let dataType: any | null = null;
 
-            cacheLists.forEach((cl, userId) => {
+            CacheUsers.forEach((cl, userId) => {
                 const data = cl[type === 'list' ? 'lists' : (type === 'title' ? 'titles' : 'categories')].find(t => t.id === id);
 
                 if (!data) return;

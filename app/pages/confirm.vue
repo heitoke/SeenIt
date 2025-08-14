@@ -5,7 +5,7 @@
 <script lang="ts" setup>
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 
 const $user = useSupabaseUser();
@@ -13,7 +13,7 @@ const $user = useSupabaseUser();
 
 watch($user, async () => {
     if ($user.value) {
-        return navigateTo(`/users/${$user.value?.id}/lists`);
+        return navigateTo(`/users/${$user.value?.app_metadata?.public_id}`);
     }
 }, { immediate: true });
 

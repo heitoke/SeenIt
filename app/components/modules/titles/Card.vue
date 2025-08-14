@@ -13,6 +13,7 @@
                     <div>
                         <TitleHeart :step="title.liked" :disabledTooltip="!canEditHeart"
                             @updateStep="title.like($event)"
+                            @click.prevent.stop=""
                         />
                     </div>
                 </div>
@@ -50,7 +51,7 @@ import { Trash, Heart, HeartOff, Timer, Star, Eye, EyeOff } from 'lucide-vue-nex
 
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { Title } from '~~/types/list';
@@ -59,7 +60,7 @@ import type { Title } from '~~/types/list';
 const $route = useRoute();
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
 const props = defineProps<{
@@ -101,7 +102,6 @@ const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/orig
         .image {
             transform: scale(0.90);
             box-sizing: border-box;
-            // border: 8px solid #fff;
             box-shadow: 0px 0px 0px 6px #fff;
         }
     }

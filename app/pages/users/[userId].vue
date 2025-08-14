@@ -1,34 +1,40 @@
 <template>
     <div class="user">
-        <div class="header" v-if="mode === 'full' && user?.id">
+        <div class="header" v-if="$cu.user && showUserHeader">
             <div class="avatar">
-                <img :src="user.user.avatar_url" alt="User Avatar">
+                <img :src="$cu.user.user.avatar_url" alt="User Avatar">
             </div>
 
             <div>
-                <div class="name">{{ user.user.name }}</div>
+                <div class="name">{{ $cu.user.user.name }}</div>
 
                 <ul class="providers">
-                    <li v-for="(key) of user.user.providers" :key="key">
+                    <li v-for="(key) of $cu.user.user.providers" :key="key">
                         <img :src="providers[key].logoUrl" alt="Logo Provider">
 
                         <span>{{ providers[key].name }}</span>
                     </li>
                 </ul>
 
-                <NuxtLink :to="`/u/${user.id}/lists`">
+                <NuxtLink :to="`/u/${$cu.user.id}/lists`">
                     <Button variant="link">Открыть списки</Button>
                 </NuxtLink>
 
-                <NuxtLink :to="`/u/${user.id}/likes`">
+                <NuxtLink :to="`/u/${$cu.user.id}/likes`">
                     <Button variant="link">{{ $t('liked') }}</Button>
                 </NuxtLink>
             </div>
         </div>
 
-        <NuxtPage :user="user" :canEdit="user?.uid === $user?.id" v-if="mode !== 'no_user'"/>
+        <NuxtPage v-if="mode === 'ready'"/>
 
-        <Alert v-if="mode === 'no_user'">
+        <Alert v-else-if="mode === 'loading'">
+            <UserRoundMinus class="h-4 w-4" />
+            <AlertTitle>Loading</AlertTitle>
+            <AlertDescription>a</AlertDescription>
+        </Alert>
+
+        <Alert v-else-if="mode === 'no_user'">
             <UserRoundMinus class="h-4 w-4" />
             <AlertTitle>{{ $t('notFoundUser.title') }}</AlertTitle>
             <AlertDescription>{{ $t('notFoundUser.description') }}</AlertDescription>
@@ -40,6 +46,9 @@
 
 import { UserRoundMinus } from 'lucide-vue-next';
 
+// * Stores
+import { useCacheUsersStore } from '~/stores/cacheUsers';
+
 // * Types
 import { type User, providers } from '~~/types/user';
 
@@ -48,43 +57,31 @@ const $route = useRoute();
 
 const $user = useSupabaseUser();
 
-
-const user = ref<User>();
-const mode = ref<'full' | 'lists' | 'no_user'>('no_user');
+const $cacheUsers = useCacheUsersStore();
 
 
-async function getUser(userId: number) {
-    const data = await $fetch(`/api/users/${userId}`);
-
-    if (!data?.id) return mode.value = 'no_user';
-
-    user.value = data;
-
-    mode.value = 'full';
-}
+const { userId, listId, categoryId } = $route.params;
 
 
-onMounted(() => {
-    const { userId: paramUserId, listId, categoryId } = $route.params;
-    const userId = Number(paramUserId);
+const $cu = $cacheUsers.get(Number(userId));
 
+
+const mode = ref<'ready' | 'no_user' | 'loading'>('loading');
+
+
+const showUserHeader = computed(() => {
+    return mode.value === 'ready' && $cu.user?.id && ($cu.canEdit ? !$route.params.listId : true);
+});
+
+
+onMounted(async () => {
     if (listId && categoryId) navigateTo(`/u/${userId}/lists/${listId}/${categoryId}`);
 
-    if ($user.value && $user.value?.app_metadata?.public_id === userId) {
-        const { id, app_metadata, user_metadata, created_at } = $user.value;
+    mode.value = 'loading';
 
-        user.value = {
-            id: app_metadata?.public_id,
-            uid: id,
-            user: {
-                ...user_metadata,
-                providers: app_metadata?.providers
-            } as User['user'],
-            created_at
-        }
+    if (!$cu?.alreadyLoadUser) await $cu.loadUser();
 
-        mode.value = 'full';
-    } else getUser(userId);
+    mode.value = $cu?.user?.id ? 'ready' : 'no_user';
 });
 
 
@@ -107,8 +104,10 @@ definePageMeta({
 
         .avatar {
             margin-right: 12px;
-            width: 128px;
-            height: 128px;
+            max-width: 128px;
+            min-width: 128px;
+            max-height: 128px;
+            min-height: 128px;
             position: relative;
             border-radius: 15px;
             overflow: hidden;

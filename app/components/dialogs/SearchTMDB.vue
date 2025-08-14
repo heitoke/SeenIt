@@ -80,7 +80,7 @@
 <script lang="ts" setup>
 
 import { Search, Plus, Loader2, Star } from 'lucide-vue-next';
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { TMDBTitleInSearch } from '~~/types/tmdb';
@@ -106,10 +106,10 @@ const props = defineProps<{
 }>();
 
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
-const $cl = $lists.get(props.userId);
+const $cu = $cacheUsers.get(props.userId);
 
 
 const open = ref(false);
@@ -122,7 +122,7 @@ const selectedTitles = ref<Map<number, TMDBTitleInSearch>>(new Map());
 
 
 const ignoreTitleIds = computed(() => {
-    const list = $cl.get('list', props.listId);
+    const list = $cu.get('list', props.listId);
 
     if (!list) return [];
 

@@ -1,14 +1,14 @@
 <template>
-    <div class="user-lists" v-if="mode === 'ready' && $cl?.userId">
+    <div class="user-lists">
         <div class="sidebar">
             <Combobox by="label"
-                :model-value="$cl.list"
+                :model-value="$cu.list"
                 @update:model-value="selectList(Number($event))"
             >
                 <ComboboxAnchor as-child>
                     <ComboboxTrigger as-child>
                         <Button variant="outline" class="justify-between" style="width: 100%;">
-                            {{ $cl.list?.name ? `${$cl.list?.name} (${$cl.list.categories.flatMap(c => c.titles).length})` : $t('selectList') }}
+                            {{ $cu.list?.name ? `${$cu.list?.name} (${$cu.list.categories.flatMap(c => c.titles).length})` : $t('selectList') }}
 
                             <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
@@ -29,7 +29,7 @@
 
                     <ComboboxGroup>
                         <ComboboxItem class="flex items-center gap-2"
-                            v-for="list in $cl.lists"
+                            v-for="list in $cu.lists"
                             :key="list.id"
                             :value="list.id"
                         >
@@ -37,18 +37,18 @@
                                 <span class="whitespace-nowrap text-ellipsis overflow-hidden">{{ list.name }} ({{ list.categories.flatMap(c => c.titles).length }})</span>
                             </div>
                             
-                            <ListSettings :userId="user?.id" :listId="list.id" v-if="canEdit">
+                            <ListSettings :userId="$cu.user?.id!" :listId="list.id" v-if="$cu.canEdit">
                                 <div @click.prevent.stop="" class="cursor-pointer opacity-70 hover:opacity-100">
                                     <Settings2/>
                                 </div>
                             </ListSettings>
 
-                            <ComboboxItemIndicator v-if="$cl.list?.id === list.id">
+                            <ComboboxItemIndicator v-if="$cu.list?.id === list.id">
                                 <Check :class="cn('ml-auto h-4 w-4')" />
                             </ComboboxItemIndicator>
                         </ComboboxItem>
 
-                        <NameField v-if="canEdit"
+                        <NameField v-if="$cu.canEdit"
                             :title="$t('createNewList')"
                             @save="createNewList($event.name)"
                         >
@@ -62,34 +62,34 @@
                 </ComboboxList>
             </Combobox>
 
-            <template v-if="$cl.list?.id">
+            <template v-if="$cu.list?.id">
                 <Button variant="outline"
                     @click="selectCategory(0)"
                 >
                     <Heart/>
-                    <span>{{ $t('liked') }} ({{ $cl.get('category', 0)?.titles?.length }})</span>
+                    <span>{{ $t('liked') }} ({{ $cu.get('category', 0)?.titles?.length }})</span>
                 </Button>
 
-                <Button v-for="category of $cl.list?.categories" :key="category.id"
-                    :variant="$cl.category?.id === category.id ? 'default' : 'secondary'"
+                <Button v-for="category of $cu.list?.categories" :key="category.id"
+                    :variant="$cu.category?.id === category.id ? 'default' : 'secondary'"
 
                     @click="selectCategory(category.id)"
                 >
                     <div>
                         <div>{{ category.name }} ({{ category.titles.length }})</div>
-                        <div style="font-size: 10px;" v-if="$cl.list.edit.enabled && category.titles.filter(t => $cl.list!.edit.selected.has(t.id)).length > 0">
-                            {{ $t('selected') }} {{ category.titles.filter(t => $cl.list!.edit.selected.has(t.id)).length }}
+                        <div style="font-size: 10px;" v-if="$cu.list.edit.enabled && category.titles.filter(t => $cu.list!.edit.selected.has(t.id)).length > 0">
+                            {{ $t('selected') }} {{ category.titles.filter(t => $cu.list!.edit.selected.has(t.id)).length }}
                         </div>
                     </div>
 
-                    <CategorySettings :userId="user?.id" :categoryId="category.id" v-if="canEdit">
+                    <CategorySettings :userId="$cu.user?.id!" :categoryId="category.id" v-if="$cu.canEdit">
                         <div class="icon absolute right-2 opacity-50 hover:opacity-100"
                             @click.prevent.stop=""
                         ><Settings2/></div>
                     </CategorySettings>
                 </Button>
 
-                <NameField :title="$t('createNewCategory')" v-if="canEdit"
+                <NameField :title="$t('createNewCategory')" v-if="$cu.canEdit"
                     @save="createNewCategory($event.name)"
                 >
                     <Button variant="ghost">
@@ -101,18 +101,8 @@
         </div>
 
         <main>
-            <NuxtPage :user="user"/>
+            <NuxtPage/>
         </main>
-    </div>
-
-    <div class="user-lists" v-else-if="mode === 'none'"></div>
-
-    <div class="user-lists error" v-else-if="mode === 'no_user'">
-        <Alert>
-            <UserRoundMinus class="h-4 w-4" />
-            <AlertTitle>{{ $t('notFoundUser.title') }}</AlertTitle>
-            <AlertDescription>{{ $t('notFoundUser.description') }}</AlertDescription>
-        </Alert>
     </div>
 </template>
 
@@ -126,7 +116,7 @@ import CategorySettings from '~/components/dialogs/categories/Settings.vue';
 import { Check, ChevronsUpDown, Search, Plus, Heart, Settings2, UserRoundMinus } from 'lucide-vue-next';
 
 // * Stores
-import { useListsStore } from '~/stores/lists';
+import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Libs
 import { cn } from '~/lib/utils';
@@ -140,63 +130,46 @@ const $route = useRoute();
 
 const $user = useSupabaseUser();
 
-const $lists = useListsStore();
+const $cacheUsers = useCacheUsersStore();
 
 
-
-const props = defineProps<{
-    user: User;
-    canEdit: boolean;
-}>();
-
-
-
-const mode = ref<'ready' | 'none' | 'no_user'>('none');
-
-
-provide('user', {
-    user: props.user,
-    canEdit: props.canEdit
-});
-
-
-const $cl = $lists.get(props?.user?.id);
+const $cu = $cacheUsers.get(Number($route.params?.userId));
 
 
 function selectList(listId: number) {
-    $cl.select('list', listId);
+    $cu.select('list', listId);
 
     navigateTo({ name: 'user-lists-list', params: { listId } });
 }
 
 function selectCategory(categoryId: number) {
-    $cl.select('category', categoryId);
+    $cu.select('category', categoryId);
 
-    navigateTo({ name: 'user-lists-category', params: { listId: $cl.list?.id, categoryId } });
+    navigateTo({ name: 'user-lists-category', params: { listId: $cu.list?.id, categoryId } });
 }
 
 
 async function createNewList(name: string) {
     if (!name) return;
 
-    $cl.createList(name);
+    $cu.createList(name);
 }
 
 async function createNewCategory(name: string) {
-    if (!name || !$cl.list?.id) return;
+    if (!name || !$cu.list?.id) return;
 
-    $cl.createCategory($cl.list?.id, name);
+    $cu.createCategory($cu.list?.id, name);
 }
 
 
 
 
 watch(() => $route.params?.listId, newId => {
-    $cl.select('list', Number(newId));
+    $cu.select('list', Number(newId));
 });
 
 watch(() => $route.params?.categoryId, newId => {
-    $cl.select('category', Number(newId));
+    $cu.select('category', Number(newId));
 });
 
 
@@ -205,16 +178,12 @@ onMounted(async () => {
     const listId = Number($route.params?.listId);
     const categoryId = Number($route.params?.categoryId);
 
-    if (!$cl.alreadyLoadData) await $cl.loadUserData();
-
     if (!isNaN(categoryId) && !isNaN(listId)) {
         selectList(listId);
         selectCategory(categoryId)
     } else if (!isNaN(listId)) {
         selectList(listId);
     }
-
-    mode.value = 'ready';
 });
 
 
@@ -257,6 +226,10 @@ definePageMeta({
     .sidebar {
         width: 100%;
         position: relative;
+    }
+
+    main {
+        width: 100%;
     }
 }
 
