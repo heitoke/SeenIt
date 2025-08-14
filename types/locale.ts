@@ -1,11 +1,6 @@
 export const codes = [
     'en',
-    'ru',
-    'ja',
-    'uk',
-    'zh',
-    'fr',
-    'es'
+    'ru'
 ] as const;
 
 export type CodeName = typeof codes[number];
@@ -23,25 +18,5 @@ export const languages: Record<CodeName, Language> = {
     ru: {
         name: 'Русский',
         emoji: '🇷🇺'
-    },
-    ja: {
-        name: '日本語',
-        emoji: '🇯🇵'
-    },
-    uk: {
-        name: 'Українська мова',
-        emoji: '🇺🇦'
-    },
-    zh: {
-        name: '漢語',
-        emoji: '🇨🇳'
-    },
-    fr: {
-        name: 'Français',
-        emoji: '🇫🇷'
-    },
-    es: {
-        name: 'Español',
-        emoji: '🇪🇸'
     }
 };

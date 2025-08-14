@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "bun run ./prebuild/index.ts",
-    "build": "bun run prebuild && nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
