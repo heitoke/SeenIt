@@ -1,7 +1,7 @@
 <template>
     <div class="title" v-if="data">
         <div class="header">
-            <img :src="titleBackdrop" alt="Title Backdrop">
+            <Image :src="titleBackdrop" alt="Title Backdrop"/>
 
             <div class="badges left">
                 <div class="media">{{ $t(data?.mediaType) }}</div>
@@ -51,6 +51,7 @@ import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
 import type { Title } from '~~/types/list';
+import Image from '~/components/ui/Image.vue';
 
 
 const $route = useRoute();
@@ -110,7 +111,7 @@ onMounted(() => {
     // background-color: var(--secondary);
     overflow: hidden;
 
-    img {
+    ::v-deep(.ui-image) {
         mask-image: linear-gradient(to bottom, black 10%, transparent 100%);
     }
 

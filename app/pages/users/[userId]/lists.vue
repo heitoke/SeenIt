@@ -159,6 +159,9 @@ async function createNewCategory(name: string) {
     if (!name || !$cu.list?.id) return;
 
     $cu.createCategory($cu.list?.id, name);
+    document.scrollingElement?.scroll({
+        top: 0
+    })
 }
 
 

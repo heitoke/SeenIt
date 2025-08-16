@@ -70,7 +70,7 @@
             <DialogFooter>
                 <DialogClose>
                     <Button variant="secondary">
-                        <span>Cancel</span>
+                        <span>{{ $t('cancel') }}</span>
                     </Button>
                 </DialogClose>
                 <DialogClose>

@@ -18,6 +18,8 @@
 
                 <div class="relative w-full max-w-sm items-center">
                     <Input id="search" type="text" :placeholder="$t('nameTitle')" class="pl-8"
+                        :model-value="titles[type].text"
+
                         @input="onInput"
                     />
                     
@@ -28,45 +30,84 @@
             </Tabs>
 
             <ul class="titles">
-                <li class="title" v-for="title of listTitles" :key="title.id"
-                    :class="{ selected: selectedTitles.has(title.id) }"
+                <Card v-for="title of listTitles" :key="title.id"
+                    :title="title"
+                    :selected="selectedTitles.has(title.id)"
 
                     @click="selectedTitles.has(title.id) ? selectedTitles.delete(title.id) : selectedTitles.set(title.id, title)"
-                >
-                    <div class="image">
-                        <img :src="`https://seenit.heito.xyz/api/images/t/p/original/${title?.poster_path}`" v-if="title?.poster_path">
-                    </div>
-
-                    <div class="details">
-                        <div class="name">{{ title?.title || title?.name }}</div>
-
-                        <ul>
-                            <li v-if="type === 'multi'">
-                                <span>{{ $t(title?.media_type) }}</span>
-                            </li>
-
-                            <li v-if="title?.vote_average > 0">
-                                <Star :size="10" color="yellow"/>
-                                <span>{{ title?.vote_average.toFixed(1) }}</span>
-                            </li>
-
-                            <li v-if="title?.release_date || title?.first_air_date">
-                                <Calendar :size="10"/>
-                                <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                />
             </ul>
 
             <DialogFooter>
+                <Popover v-if="selectedTitles.size > 0">
+                    <PopoverTrigger>
+                        <Button>
+                            <ChevronUp/>
+
+                            <span>{{ $t('selected') }} <b>{{ selectedTitles.size }}</b></span>
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent :side="'top'" style="min-width: clamp(320px, 50vw, 440px);">
+                        <ul class="titles">
+                            <Dialog v-for="[id, title] of selectedTitles" :key="title.id">
+                                <DialogTrigger as-child>
+                                    <Card :title="title" :selected="true"/>
+                                </DialogTrigger>
+                                <DialogContent class="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>{{ $t('delete') }} <b>{{ title?.title || title?.name }}</b></DialogTitle>
+                                        <DialogDescription>{{ $t('confirmDelete.description') }}</DialogDescription>
+                                    </DialogHeader>
+
+                                    <Card :title="title" style="padding: 0;"/>
+
+                                    <DialogFooter>
+                                        <DialogClose>
+                                            <Button variant="secondary">{{ $t('cancel') }}</Button>
+                                        </DialogClose>
+                                        
+                                        <DialogClose>
+                                            <Button variant="destructive" @click="selectedTitles.delete(id)">{{ $t('delete') }}</Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </ul>
+
+                        <Dialog>
+                            <DialogTrigger as-child>
+                                <Button variant="destructive" style="margin-top: 12px;" v-if="selectedTitles.size > 3">
+                                    <span>{{ $t('clear') }}</span>
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent class="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>{{ $t('clear') }}</DialogTitle>
+                                    <DialogDescription>-_^</DialogDescription>
+                                </DialogHeader>
+                                
+                                <DialogFooter>
+                                    <DialogClose>
+                                        <Button variant="secondary">{{ $t('cancel') }}</Button>
+                                    </DialogClose>
+                                    
+                                    <DialogClose>
+                                        <Button variant="destructive" @click="selectedTitles.clear()">{{ $t('delete') }}</Button>
+                                    </DialogClose>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </PopoverContent>
+                </Popover>
+                
+
                 <Button :disabled="selectedTitles.size < 1 || loading"
                     @click="$emit('save', {
                         titles: [...selectedTitles.values()],
                         close: () => {
                             open = false;
 
-                            titles = [];
+                            titles[type] = { text: '', list: [] };
                             selectedTitles.clear();
                         },
                         loading: (bool: boolean) => loading = bool
@@ -78,7 +119,7 @@
                     </template>
                     <template v-else>
                         <Plus/>
-                        <span>{{ $t('addTitles') }} ({{ selectedTitles.size }})</span>
+                        <span>{{ $t('addTitles') }}</span>
                     </template>
                 </Button>
             </DialogFooter>
@@ -88,7 +129,9 @@
 
 <script lang="ts" setup>
 
-import { Search, Plus, Loader2, Star, Calendar } from 'lucide-vue-next';
+import Card from './searchTMDB/Card.vue';
+
+import { Search, Plus, Loader2, ChevronUp } from 'lucide-vue-next';
 import { useCacheUsersStore } from '~/stores/cacheUsers';
 
 // * Types
@@ -100,6 +143,8 @@ interface EmitSave {
     loading(bool: boolean): void;
     close(): void;
 }
+
+type Type = 'multi' | 'movie' | 'tv';
 
 
 defineEmits({
@@ -123,10 +168,14 @@ const $cu = $cacheUsers.get(props.userId);
 
 const open = ref(false);
 const loading = ref(false);
-const type = ref<'multi' | 'movie' | 'tv'>('multi');
+const type = ref<Type>('multi');
 
 
-const titles = ref<Array<TMDBTitleInSearch>>([]);
+const titles = ref<Record<Type, { text: string, list: Array<TMDBTitleInSearch> }>>({
+    multi: { text: '', list: [] },
+    movie: { text: '', list: [] },
+    tv: { text: '', list: [] }
+});
 const selectedTitles = ref<Map<number, TMDBTitleInSearch>>(new Map());
 
 
@@ -138,8 +187,7 @@ const ignoreTitleIds = computed(() => {
     return list.categories.reduce((a, b) => ([ ...a, ...b.titles.map(t => t.data.id) ]), [] as Array<number>);
 });
 
-const listTitles = computed(() => titles.value.filter(t => !ignoreTitleIds.value.includes(t.id)));
-
+const listTitles = computed(() => titles.value[type.value].list.filter(t => !ignoreTitleIds.value.includes(t.id)));
 
 
 let timer: NodeJS.Timeout;
@@ -148,6 +196,10 @@ function onInput(event: InputEvent) {
     const value = (event.target as HTMLInputElement)!.value;
 
     clearTimeout(timer);
+
+    if (!value || value.trim() === '') return;
+
+    titles.value[type.value].text = value;
     
     timer = setTimeout(async () => {
         const data = await $fetch('/api/tmdb/search', {
@@ -158,9 +210,7 @@ function onInput(event: InputEvent) {
             }
         });
 
-        titles.value = data.results.filter(t => t?.media_type === 'movie' || t?.media_type === 'tv');
-
-        console.log(titles.value)
+        titles.value[type.value].list = data.results.filter(t => t?.media_type === 'movie' || t?.media_type === 'tv');
     }, 500);
 }
 
@@ -172,67 +222,9 @@ ul.titles {
     max-height: 50vh;
     overflow-x: hidden;
 
-    li.title {
-        cursor: pointer;
-        display: flex;
-        padding: 4px;
-        border-radius: 7px;
-        border: 1px solid transparent;
-        align-items: center;
-        transition: .2s;
-
-        & + li {
-            margin-top: 4px;
-        }
-
-        &.selected {
-            background-color: var(--secondary);
-
-            .name {
-                text-decoration: underline;
-            }
-        }
-
-        .image {
-            margin-right: 8px;
-            max-width: 64px;
-            min-width: 64px;
-            height: 96px;
-            border-radius: 7px;
-            background-color: var(--secondary);
-            overflow: hidden;
-
-            img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center;
-            }
-        }
-
-        .details {
-            .name {
-                font-size: 14px;
-                font-weight: 600;
-            }
-
-            ul {
-                display: flex;
-                gap: 2px;
-
-                li {
-                    display: flex;
-                    padding: 2px 4px;
-                    font-size: 10px;
-                    border-radius: 25px;
-                    align-items: center;
-                    background-color: #00000045;
-
-                    span {
-                        margin-left: 4px;
-                    }
-                }
-            }
+    .title {
+        &:not(:last-child) {
+            margin-bottom: 4px;
         }
     }
 }

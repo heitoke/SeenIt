@@ -38,6 +38,8 @@
             </div>
 
             <Toggle :model-value="$cu.list?.edit.enabled" v-if="$cu.canEdit"
+                class="cursor-pointer"
+
                 @click="$cu.list?.edit.toggle()"
             >
                 <Pencil class="h-4 w-4" />
@@ -123,7 +125,7 @@
         </div>
 
         <div class="grid-titles" v-if="$cu?.category?.titles?.length! > 0">
-            <TitleCard v-for="title of $cu.category?.filters.titles" :key="title.id" :title="title"
+            <TitleCard v-for="title of listTitles" :key="title.id" :title="title"
                 :selected="$cu.list?.edit.enabled && $cu.list?.edit.selected.has(title.id)"
                 :canEditHeart="$cu.canEdit"
                 :disableContextMenu="!$cu.canEdit"
@@ -168,6 +170,18 @@ const $cacheUsers = useCacheUsersStore();
 
 
 const $cu = $cacheUsers.get(userId);
+
+
+
+const page = ref<[number, number]>([20, 1]);
+
+
+const listTitles = computed(() => {
+    const [size, pageCount] = page.value;
+
+    return $cu.category?.filters.titles.slice(0, pageCount * size);
+});
+
 
 
 let timer: NodeJS.Timeout;
@@ -215,11 +229,28 @@ async function onMoveTitles(categoryId: number) {
 }
 
 
+function onScroll(event: Event) {
+    if (!document.scrollingElement) return;
+
+    const { scrollHeight, scrollTop } = document.scrollingElement!;
+
+    if (window.innerHeight + scrollTop > scrollHeight - (window.innerHeight / 6)) {
+        page.value[1]++;
+    }
+}
+
+
 
 onMounted(() => {
+    document.addEventListener('scroll', onScroll);
+
     if (isNaN(categoryId)) return;
 
     $cu.select('category', categoryId);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('scroll', onScroll);
 });
 
 
@@ -231,6 +262,7 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
+
 
 .toolsbar {
     display: flex;
@@ -249,16 +281,6 @@ definePageMeta({
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     z-index: 2;
-}
-
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: all .2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
 }
 
 

@@ -17,7 +17,9 @@
                         />
                     </div>
                 </div>
-                <img :src="titlePoster" alt="Title Poster">
+
+                <Image :src="titlePoster" alt="Title Poster"/>
+                <!-- <img :src="titlePoster" alt="Title Poster"> -->
             </div>
 
             <div class="details">
@@ -31,9 +33,15 @@
                         <span v-if="(data?.runtime / 60) >= 1">{{ Math.floor(data?.runtime / 60) }}h</span>
                         <span>{{ data?.runtime % 60 }}m</span>
                     </li>
-                    <li>
+
+                    <li v-if="data?.vote_average > 0">
                         <Star :size="10" color="yellow"/>
-                        <span>{{ data?.vote_average.toFixed(1) }}</span>
+                        <span>{{ data?.vote_average.toFixed(1) }}/{{ data?.vote_count }}</span>
+                    </li>
+
+                    <li>
+                        <Calendar :size="10"/>
+                        <span>{{ new Date(data?.release_date).getFullYear() }}</span>
                     </li>
                 </ul>
             </div>
@@ -47,7 +55,8 @@
 import TitleContextMenu from './Context.vue';
 import TitleHeart from './Heart.vue';
 
-import { Trash, Heart, HeartOff, Timer, Star, Eye, EyeOff } from 'lucide-vue-next';
+import { Trash, Heart, HeartOff, Timer, Star, Eye, EyeOff, Calendar } from 'lucide-vue-next';
+import Image from '~/components/ui/Image.vue';
 
 
 // * Stores
@@ -159,7 +168,7 @@ const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/orig
             }
         }
 
-        img {
+        ::v-deep(.ui-image) {
             width: 100%;
             height: 100%;
             position: absolute;
@@ -167,11 +176,6 @@ const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/orig
             object-fit: cover;
             object-position: center;
             z-index: 1;
-
-            &:nth-child(4) {
-                left: 10px;
-                filter: blur(5px);
-            }
         }
     }
     

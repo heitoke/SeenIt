@@ -3,7 +3,9 @@
 
     <NuxtPwaManifest/>
 
-    <NuxtPage class="page"/>
+    <Transition name="fade">
+        <NuxtPage class="page"/>
+    </Transition>
 </template>
 
 <script setup lang="ts">
@@ -28,9 +30,16 @@ useHead({
 <style lang="scss">
 
 .page {
-    padding: 0 12px;
-    margin: 12px auto 64px auto;
-    max-width: 1280px;
+    width: 100%;
+    position: absolute;
+    padding: 12px calc((100vw - 1256px) / 2) 32px calc((100vw - 1256px) / 2);
+    transition: opacity .5s, transform .5s;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transform: translateY(-64px);
+    opacity: 0;
 }
 
 </style>
