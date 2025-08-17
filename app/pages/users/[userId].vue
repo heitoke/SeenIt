@@ -2,7 +2,7 @@
     <div class="user">
         <div class="header" v-if="$cu.user && showUserHeader">
             <div class="avatar">
-                <img :src="$cu.user.user.avatar_url" alt="User Avatar">
+                <Image :src="$cu.user.user.avatar_url" alt="User Avatar"/>
             </div>
 
             <div>
@@ -43,6 +43,8 @@
 </template>
 
 <script lang="ts" setup>
+
+import Image from '~/components/ui/Image.vue';
 
 import { UserRoundMinus } from 'lucide-vue-next';
 
@@ -112,7 +114,7 @@ definePageMeta({
             border-radius: 15px;
             overflow: hidden;
 
-            img {
+            ::v-deep(.ui-image) {
                 width: 100%;
                 height: 100%;
             }
@@ -126,6 +128,7 @@ definePageMeta({
         .providers {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
 
             li {
@@ -146,6 +149,23 @@ definePageMeta({
                     font-size: 14px;
                     opacity: .7;
                 }
+            }
+        }
+    }
+
+    @media (max-width: 360px) {
+        .header {
+            margin-bottom: 0;
+            align-items: start;
+            flex-direction: column;
+
+            .avatar {
+                margin: 0 auto 12px auto;
+                padding-bottom: 100%;
+                max-width: 100%;
+                min-width: 100%;
+                max-height: auto;
+                min-height: auto;
             }
         }
     }
