@@ -6,7 +6,6 @@ import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server';
 import type { User } from '~~/types/user';
 
 export default defineEventHandler(async (event) => {
-    const $user = await serverSupabaseUser(event);
     const client = await serverSupabaseClient<Database>(event);
 
     const userId = getRouterParam(event, 'id');

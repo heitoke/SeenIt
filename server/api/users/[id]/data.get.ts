@@ -3,12 +3,12 @@ import type { Database } from '~~/types/database.types';
 import { serverSupabaseUser, serverSupabaseClient } from '#supabase/server';
 
 export default defineEventHandler(async (event) => {
-    const $user = await serverSupabaseUser(event);
+    const $user = await serverSupabaseUser(event).catch(() => null);
     const client = await serverSupabaseClient<Database>(event);
 
     const userId = getRouterParam(event, 'id');
 
-    const isAuthUser = String($user?.app_metadata?.public_id) === String(userId);
+    const isAuthUser = $user && String($user?.app_metadata?.public_id) === String(userId);
 
     let query = client
         .from('lists')
