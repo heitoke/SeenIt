@@ -1,7 +1,7 @@
 <template>
     <div :class="['title', { selected }]">
         <div class="image">
-            <Image :src="`https://seenit.heito.xyz/api/images/t/p/original/${title?.poster_path}`" v-if="title?.poster_path"/>
+            <Image :src="`https://tmdbimg.rootu.top/t/p/original${title?.poster_path}`" v-if="title?.poster_path"/>
         </div>
 
         <div class="details">

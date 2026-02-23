@@ -27,15 +27,15 @@
             </div>
         </div>
 
-        <!-- <div class="group">
+        <div class="group">
             <h2>Сезоны</h2>
 
             <ul class="seasons">
                 <li v-for="season of data?.seasons" :key="season.id">
-                    <img :src="`https://seenit.heito.xyz/api/images/t/p/original/${season?.poster_path}`" alt="Season" v-if="season?.poster_path">
+                    <img :src="`https://tmdbimg.rootu.top/t/p/original${season?.poster_path}`" alt="Season" v-if="season?.poster_path">
                 </li>
             </ul>
-        </div> -->
+        </div>
     </div>
 </template>
 
@@ -66,7 +66,7 @@ const title = ref<Title>();
 
 const data = computed(() => title.value?.data);
 
-const titleBackdrop = computed(() => `https://seenit.heito.xyz/api/images/t/p/original/${data.value?.backdrop_path}`);
+const titleBackdrop = computed(() => `https://tmdbimg.rootu.top/t/p/original${data.value?.backdrop_path}`);
 
 
 async function loadTitle(titleId: number) {

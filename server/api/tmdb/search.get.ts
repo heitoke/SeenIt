@@ -6,7 +6,7 @@ export default eventHandler(async (event) => {
 
     if (type !== 'multi' && type !== 'movie' && type !== 'tv') return { results: [] };
 
-    const res = await fetch(`https://api.themoviedb.org/3/search/${type}?query=${text}&include_adult=${adult}&language=${lang}&page=1`, {
+    const res = await fetch(`https://tmdbapi.rootu.top/3/search/${type}?query=${text}&include_adult=${adult}&language=${lang}&page=1`, {
         headers: {
             Accept: 'application/json',
             Authorization: `Bearer ${config.tmdbApiKey}`

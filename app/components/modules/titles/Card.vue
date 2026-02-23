@@ -88,7 +88,11 @@ defineEmits({
 
 const data = computed(() => props.title?.data);
 
-const titlePoster = computed(() => `https://seenit.heito.xyz/api/images/t/p/original/${data.value?.poster_path}`);
+const titlePoster = computed(() =>
+// `https://seenit.heito.xyz/api/images/t/p/original/${data.value?.poster_path}`
+`https://tmdbimg.rootu.top/t/p/original/${data.value?.poster_path}`
+// `https://media.themoviedb.org/t/p/w220_and_h330_face${data.value?.poster_path}`
+);
 
 </script>
 

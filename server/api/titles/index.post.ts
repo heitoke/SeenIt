@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
         }
 
         if (!tmdbTitle[0]?.id) {
-            const res = await fetch(`https://api.themoviedb.org/3/${mediaType}/${id}?language=${language}`, {
+            const res = await fetch(`https://tmdbapi.rootu.top/3/${mediaType}/${id}?language=${language}`, {
                 headers: {
                     Accept: 'application/json',
                     Authorization: `Bearer ${config.tmdbApiKey}`
