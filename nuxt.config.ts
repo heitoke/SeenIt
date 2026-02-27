@@ -9,7 +9,8 @@ export default defineNuxtConfig({
     modules: [
         '@pinia/nuxt',
         '@nuxtjs/i18n',
-        'nuxt-mongoose'
+        'nuxt-mongoose',
+        './server/modules/auth.module'
     ],
 
     runtimeConfig: {

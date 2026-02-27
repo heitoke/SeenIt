@@ -1,10 +1,15 @@
 <template>
+    <Header/>
+    
     <Transition name="fade">
         <NuxtPage class="page"/>
     </Transition>
 </template>
 
 <script lang="ts" setup>
+
+// * Components
+import Header from '~/components/header/Index.vue';
 
 useSeoMeta({
     title: 'SeenIt',
