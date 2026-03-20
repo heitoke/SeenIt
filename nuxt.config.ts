@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     css: ['~/assets/styles/root.scss'],
 
     modules: [
+        '@heito/hxui/nuxt',
         '@pinia/nuxt',
         '@nuxtjs/i18n',
         'nuxt-mongoose',
@@ -14,20 +15,29 @@ export default defineNuxtConfig({
     ],
 
     runtimeConfig: {
-        tmdbApiKey: ''
+        tmdbApiUrl: process.env.TMDB_API_URL || 'https://api.themoviedb.org',
+        tmdbApiKey: process.env.TMDB_API_KEY || '',
+        
+        public: {
+            tmdbImageUrl: process.env.TMDB_IMAGE_URL || 'https://image.tmdb.org'
+        }
     },
 
     pinia: {
         storesDirs: ['./stores/**']
     },
 
-    components: [
-        {
-            path: '~/components/ui',
-            pathPrefix: false,
-            prefix: 'UI'
-        }
-    ],
+    // components: [
+    //     {
+    //         path: '~/components/ui',
+    //         pathPrefix: false,
+    //         prefix: 'UI'
+    //     }
+    // ],
+
+    hxUI: {
+        prefix: ''
+    },
 
     mongoose: {
         uri: process.env.MONGODB_URI,

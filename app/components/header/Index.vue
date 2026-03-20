@@ -30,7 +30,6 @@ import Language from './Language.vue';
 
 header {
     display: flex;
-    padding: 0 12px;
     margin: 0 auto;
     max-width: 1280px;
     height: 48px;

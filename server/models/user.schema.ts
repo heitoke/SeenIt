@@ -1,23 +1,29 @@
 import { defineMongooseModel } from '#nuxt/mongoose';
 
+// * Types
+import type { User } from '~~/types/db/user';
 
-export const UserSchema = defineMongooseModel({
+
+export const UserSchema = defineMongooseModel<User>({
     name: 'users',
     schema: {
         username: {
-            type: 'string',
+            type: String,
             minlength: 1,
             unique: true
         },
         email: {
-            type: 'string',
+            type: String,
             minlength: 5,
             unique: true
         },
         password: {
-            type: 'string',
+            type: String,
             minlength: 3,
         }
+    },
+    options: {
+        timestamps: true
     },
     hooks(schema) {
         schema.pre('save', function(next) {

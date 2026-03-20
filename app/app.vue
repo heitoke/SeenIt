@@ -27,8 +27,10 @@ useHead({
 <style lang="scss">
 
 .page {
+    margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 64px;
     max-width: 1280px;
     transition: opacity .5s, transform .5s;
 }

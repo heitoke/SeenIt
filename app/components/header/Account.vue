@@ -1,53 +1,53 @@
 <template>
     <div class="account">
-        <UIPopover v-if="user?._id">
+        <Popover style="width: 215px;" v-if="user?._id">
             <template v-slot="{ toggle }">
                 <div class="avatar" @click.prevent.stop="toggle">
                     <span>{{ user?.username }}</span>
 
-                    <img :src="`https://avatars.heito.xyz/beam/32/${user?._id}?square=false`"></img>
+                    <img :src="getUrlAvatar(String(user?._id))"></img>
                 </div>
             </template>
 
             <template #content>
-                <UIMenu>
+                <Menu>
                     <NuxtLink :to="`/users/${user?._id}`">
-                        <UIMenuButton>
+                        <MenuButton>
                             <User/>
 
                             <span>{{ $t('profile') }}</span>
-                        </UIMenuButton>
+                        </MenuButton>
                     </NuxtLink>
 
-                    <UIMenuButton>
+                    <MenuButton>
                         <ScrollText/>
 
                         <span>{{ $t('dashboard') }}</span>
-                    </UIMenuButton>
+                    </MenuButton>
 
-                    <UIMenuButton>
+                    <MenuButton>
                         <Settings/>
 
                         <span>{{ $t('settings') }}</span>
-                    </UIMenuButton>
+                    </MenuButton>
 
-                    <UIMenuSeparator/>
+                    <MenuSeparator/>
 
-                    <UIMenuButton @click="logOut">
+                    <MenuButton @click="logOut">
                         <LogOut/>
 
                         <span>{{ $t('logOut') }}</span>
-                    </UIMenuButton>
-                </UIMenu>
+                    </MenuButton>
+                </Menu>
             </template>
-        </UIPopover>
+        </Popover>
 
         <NuxtLink to="/auth" v-else>
-            <UIButton>
+            <Button>
                 <ScanFace/>
 
                 <span>{{ $t('signIn') }}</span>
-            </UIButton>
+            </Button>
         </NuxtLink>
     </div>
 </template>

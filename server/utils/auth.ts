@@ -1,3 +1,4 @@
+// * Types
 import type { H3Event } from 'h3';
 
 
@@ -18,6 +19,18 @@ class UserAuth {
         const session = await $useSession(event);
 
         return session.clear(); 
+    }
+    
+    async getUser(event: H3Event) {
+        const token = await this.get(event);
+
+        if (!token) return null;
+
+        const payload = await verifyJWT(token);
+
+        const user = await UserSchema.findOne({ _id: payload.id }).select('-password');
+
+        return user?.toJSON();
     }
 
     async require(event: H3Event) {

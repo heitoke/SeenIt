@@ -1,8 +1,8 @@
 // * Types
-import type { AuthPayload } from '~~/types/auth';
+import type { User } from '~~/types/db/user';
 
 
-const useUserSessionState = () => useState<AuthPayload>('nuxt-mongoose-auth', () => ({}));
+const useUserSessionState = () => useState<Partial<User>>('nuxt-mongoose-auth', () => ({}));
 
 
 async function me() {
@@ -22,10 +22,12 @@ async function logOut() {
 
 export function useUserAuth() {
     const sessionState = useUserSessionState();
+    const dashboards = useDashboardsStore();
 
     return {
         loggedIn: computed(() => Boolean(sessionState.value?.email)),
         user: computed(() => sessionState.value || null),
+        d: dashboards.get(String(sessionState.value?._id)),
         logOut,
         me
     }

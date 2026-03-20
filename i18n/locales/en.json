@@ -19,6 +19,7 @@
     "movie": "Movie",
     "tv": "TV",
     "selectList": "Select list",
+    "selectCategory": "Select category",
     "searchTitle": "Search title",
     "search": "Search",
     "searchTmdb": {
@@ -27,6 +28,8 @@
     "selected": "Selected",
     "createNewList": "Create new list",
     "createNewCategory": "Create new category",
+    "editList": "Edit list",
+    "editCategory": "Edit category",
     "liked": "Liked",
     "unliked": "Unliked",
     "moveTo": "Move to",
@@ -52,5 +55,10 @@
         "description": "Do you confirm the deletion of this title?"
     },
     "users": "Users",
-    "clear": "Clear"
+    "clear": "Clear",
+    "logos": "Logos",
+    "posters": "Posters",
+    "backdrops": "Backdrops",
+    "videos": "Videos",
+    "close": "Close"
 }

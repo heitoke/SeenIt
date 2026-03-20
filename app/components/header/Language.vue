@@ -1,44 +1,42 @@
 <template>
     <div class="language">
-        <UIPopover>
+        <Popover style="padding: 4px; width: 215px;">
             <template v-slot="{ toggle }">
-                <div class="btn-lang"
-                    @click.prevent.stop="toggle($event)"
-                >
-                    <span>{{ locale }}</span>
+                <div class="btn-lang" @click="toggle">
+                    <span>{{ globalLocale }}</span>
 
                     <Languages :size="16"/>
                 </div>
             </template>
-
+            
             <template #content>
-                <UIMenu>
-                    <UIMenuLabel>
-                        {{ $t('langs') }}
-                    </UIMenuLabel>
+                <Menu>
+                    <MenuLabel>{{ $t('langs') }}</MenuLabel>
 
-                    <UIMenuSeparator/>
+                    <MenuSeparator/>
 
-                    <UIButton v-for="locale in locales" :key="locale.code"
-                        variant="ghost"
-                        style="margin-top: 4px; width: 100%;"
-                        
+                    <MenuRadio v-for="locale in locales" :key="locale.code"
+                        name="lang"
+                        :label="`${locale.name} ${languages[locale.code].emoji}`"
+                        :value="locale.code"
+
+                        v-model="globalLocale"
+
                         @click="setLocale(locale.code)"
-                    >
-                        {{ locale.name }}
-                    </UIButton>
-                </UIMenu>
+                    />
+                </Menu>
             </template>
-        </UIPopover>
+        </Popover>
     </div>
 </template>
 
 <script lang="ts" setup>
 
 import { Languages } from 'lucide-vue-next';
+import { languages } from '~~/types/locale';
 
 
-const { locales, locale, setLocale } = useI18n();
+const { locales, locale: globalLocale, setLocale } = useI18n();
 
 </script>
 
