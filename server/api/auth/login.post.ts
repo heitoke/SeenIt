@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const user = await UserSchema.findOne({ $or: [{ email: login }, { username: login }] });
+    const user = await mongoose.connection.db?.collection('users').findOne({ $or: [{ email: login }, { username: login }] }); // await UserSchema.findOne({ $or: [{ email: login }, { username: login }] });
 
     if (!user) throw createError({
         statusMessage: errorMessage
@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
     await $userAuth.set(event, String(user._id));
 
     return {
-        loggedIn: true
+        loggedIn: true,
+        user
     }
 })

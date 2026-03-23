@@ -9,7 +9,7 @@ export interface ModuleOptions {
 export default defineNuxtModule<ModuleOptions>({
     meta: {
         name: 'seen-it-auth',
-        configKey: 'seenItAuth',
+        configKey: 'seenItAuth'
     },
     defaults: {
         secret: process.env.SECRET as string

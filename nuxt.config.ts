@@ -28,14 +28,6 @@ export default defineNuxtConfig({
         storesDirs: ['./stores/**']
     },
 
-    // components: [
-    //     {
-    //         path: '~/components/ui',
-    //         pathPrefix: false,
-    //         prefix: 'UI'
-    //     }
-    // ],
-
     hxUI: {
         prefix: ''
     },
