@@ -104,8 +104,8 @@ export class DashboardTitles extends Array<DashboardTitle> {
     }
 
 
-    public hasByTMDBId(tmdbId: number) {
-        return this.findIndex(title => title.tmdb?.id === tmdbId) >= 0;
+    public hasByTMDBId(tmdbId: number, mediaType: number) {
+        return this.findIndex(title => title.tmdb?.id === tmdbId && title.tmdb.mediaType === mediaType) >= 0;
     }
 
     public getByTMDBId(tmdbId: number) {

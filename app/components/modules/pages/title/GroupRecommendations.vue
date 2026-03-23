@@ -8,7 +8,7 @@
             :inset="true" :items="list" :step="6" :gap="12"
         >
             <template #item="{ item: title, index }">
-                <NuxtLink v-if="$d.titles.hasByTMDBId(title.id)"
+                <NuxtLink v-if="$d.titles.hasByTMDBId(title.id, title.media_type === 'movie' ? 0 : 1)"
                     :to="`/titles/${$d.titles.getTitleIdByTMDBId(title.id)}`"
                 >
                     <TitleCard
