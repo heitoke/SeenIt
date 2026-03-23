@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const errorMessage = 'login or password is wrong! please try again later';
 
 export default defineEventHandler(async (event) => {
-    // TODO: use validation
+    const $config = useRuntimeConfig();
     const { login, password } = await readBody(event)
 
     if (!login || !password) {
@@ -12,13 +13,15 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const user = await mongoose.connection.db?.collection('users').findOne({ $or: [{ login }, { username: login }] });
+    const user = await UserSchema.findOne({ $or: [{ email: login }, { username: login }] });
 
     if (!user) throw createError({
         statusMessage: errorMessage
     });
 
-    if (password !== user.password) throw createError({
+    const matches = await bcrypt.compare(password + $config.secret, user.password);
+
+    if (!matches) throw createError({
         statusMessage: errorMessage
     });
 

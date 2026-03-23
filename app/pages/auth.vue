@@ -69,6 +69,12 @@ if ($userAuth?.user?.value?._id) {
     await navigateTo("/", { external: true });
 }
 
+
+const regexUsername = /^(?!.*[_.]{2})[a-zA-Z0-9][a-zA-Z0-9_.]{1,18}[a-zA-Z0-9]$/;
+const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+
+
 const email = ref<string>("");
 const username = ref<string>("");
 const password = ref<string>("");
@@ -78,16 +84,11 @@ const isLogin = computed(() => {
 });
 
 const isValidAuth = computed(() => {
-    if (!email.value || email.value.trim() === "" || email.value.length < 3)
-        return false;
-    if (
-        !password.value ||
-        password.value.trim() === "" ||
-        password.value.length < 8
-    )
-        return false;
-    if (!isLogin.value && (!username.value || username.value.trim() === ""))
-        return false;
+    if (!email.value || email.value.trim() === "" || email.value.length < 3 || (isLogin.value ? false : !regexEmail.test(email.value))) return false;
+
+    if (!password.value || password.value.trim() === "" || password.value.length < 8 || !regexPassword.test(password.value))return false;
+
+    if (!isLogin.value && (!username.value || username.value.trim() === "" || !regexUsername.test(username.value))) return false;
 
     return true;
 });
@@ -95,24 +96,19 @@ const isValidAuth = computed(() => {
 async function onAuthUser() {
     if (!isValidAuth.value) return;
 
-    console.log(isLogin);
-
-    const { data } = await useFetch(
-        `/api/auth/${isLogin.value ? "login" : "register"}`,
-        {
-            body: isLogin.value
-                ? {
-                      login: email.value,
-                      password: password.value,
-                  }
-                : {
-                      email: email.value,
-                      username: username.value,
-                      password: password.value,
-                  },
-            method: "POST",
-        },
-    );
+    const { data } = await useFetch(`/api/auth/${isLogin.value ? "login" : "register"}`,
+    {
+        body: isLogin.value
+            ? {
+                login: email.value,
+                password: password.value,
+            } : {
+                email: email.value,
+                username: username.value,
+                password: password.value,
+            },
+        method: "POST",
+    });
 
     // @ts-ignore
     if (data.value?.loggedIn === true || data.value?.registered === true) {

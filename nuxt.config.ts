@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     ],
 
     runtimeConfig: {
+        secret: process.env.SECRET || 'seen-it-secret',
         tmdbApiUrl: process.env.TMDB_API_URL || 'https://api.themoviedb.org',
         tmdbApiKey: process.env.TMDB_API_KEY || '',
         
