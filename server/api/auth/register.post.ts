@@ -29,19 +29,19 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    let newUser;
-
     const hashed = await bcrypt.hash(password + $config.secret, 10);
 
+    let newUser;
+
     try {
-        newUser = await mongoose.connection.db?.collection('users').insertOne({ username, email, password: hashed });
+        newUser = await UserSchema.insertOne({ username, email, password: hashed });
     } catch (error) {
         throw createError({
             statusMessage: 'User already registered.',
         });
     }
 
-    await $userAuth.set(event, String(newUser?.insertedId));
+    await $userAuth.set(event, String(newUser?._id));
 
     return {
         registered: true

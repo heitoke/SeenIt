@@ -1,5 +1,8 @@
+import mongoose from 'mongoose';
+
 // * Types
 import type { H3Event } from 'h3';
+import { User } from '~~/types/db/user';
 
 
 class UserAuth {
@@ -43,7 +46,12 @@ class UserAuth {
         
         const payload = await verifyJWT(token);
 
-        const user = await UserSchema.findOne({ _id: payload.id }).select('-password');
+        if (!payload?.id) throw createError({
+            statusCode: 401,
+            statusMessage: 'Unauthorized - invalid token'
+        });
+
+        const user = await UserSchema.findOne({ _id: String(payload.id) }).select('-password');
 
         if (!user) throw createError({
             statusCode: 401,

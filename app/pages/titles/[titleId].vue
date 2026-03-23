@@ -1,7 +1,7 @@
 <template>
     <div class="title" v-if="data">
         <div class="header">
-            <Image :src="titleBackdrop" alt="Title Backdrop"/>
+            <Image :src="getImageTMDB(data.backdrop_path)" alt="Title Backdrop"/>
 
             <div class="badges left">
                 <div class="media">{{ $t(data?.mediaType === 0 ? 'movie' : 'tv') }}</div>
@@ -67,8 +67,6 @@ const title = ref<DashboardTitle>();
 
 
 const data = computed(() => title.value?.tmdb);
-
-const titleBackdrop = computed(() => `https://tmdbimg.rootu.top/t/p/original${data.value?.backdrop_path}`);
 
 
 async function loadTitle(titleId: string) {
