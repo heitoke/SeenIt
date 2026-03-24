@@ -108,7 +108,7 @@
                         })"
                     >
                         <template v-if="loading">
-                            <Loader2 class="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 class="animation-spin" />
                             {{ $t('pleaseWait') }}...
                         </template>
                         <template v-else>

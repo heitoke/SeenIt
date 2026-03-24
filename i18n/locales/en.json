@@ -9,6 +9,14 @@
     "email": "Email",
     "username": "Username",
     "password": "Password",
+    "repeatPassword": "Repeat password",
+    "passwordValid": [
+        "The password must be at least 8 characters long.",
+        "The password must contain at least one lowercase Latin letter.",
+        "The password must contain at least one uppercase Latin letter.",
+        "The password must contain at least one digit.",
+        "The passwords must match."
+    ],
     "auth": {
         "title": "Authorization in SeenIt",
         "description": "Using the services below, log in to SeenIt and use it as you like."

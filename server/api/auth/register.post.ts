@@ -34,14 +34,17 @@ export default defineEventHandler(async (event) => {
     let newUser;
 
     try {
-        newUser = await UserSchema.insertOne({ username, email, password: hashed });
+        newUser = await mongoose.connection.db?.collection('users').insertOne({ username, email, password: hashed });
     } catch (error) {
+        const isError = !String(error).includes('E11000');
+
         throw createError({
-            statusMessage: 'User already registered.',
+            statusCode: isError ? 500 : 401,
+            statusMessage: isError ? String(error) : 'User already registered.',
         });
     }
 
-    await $userAuth.set(event, String(newUser?._id));
+    await $userAuth.set(event, String(newUser?.insertedId));
 
     return {
         registered: true

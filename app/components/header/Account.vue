@@ -19,17 +19,13 @@
                         </MenuButton>
                     </NuxtLink>
 
-                    <MenuButton>
-                        <ScrollText/>
+                    <NuxtLink :to="`/users/${user?._id}/lists`">
+                        <MenuButton>
+                            <ScrollText/>
 
-                        <span>{{ $t('dashboard') }}</span>
-                    </MenuButton>
-
-                    <MenuButton>
-                        <Settings/>
-
-                        <span>{{ $t('settings') }}</span>
-                    </MenuButton>
+                            <span>{{ $t('dashboard') }}</span>
+                        </MenuButton>
+                    </NuxtLink>
 
                     <MenuSeparator/>
 
@@ -54,7 +50,7 @@
 
 <script lang="ts" setup>
 
-import { User, ScrollText, Settings, LogOut, ScanFace } from 'lucide-vue-next';
+import { User, ScrollText, LogOut, ScanFace } from 'lucide-vue-next';
 
 const { user, logOut } = useUserAuth();
 
