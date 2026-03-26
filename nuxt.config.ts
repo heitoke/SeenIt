@@ -4,6 +4,15 @@ import { languages, type CodeName } from './types/locale';
 export default defineNuxtConfig({
     devtools: { enabled: true },
 
+    routeRules: {
+        '/one-tab': {
+            headers: {
+                'X-Frame-Options': '',
+                'Content-Security-Policy': 'frame-ancestors *'
+            }
+        }
+    },
+
     css: ['~/assets/styles/root.scss'],
 
     modules: [
