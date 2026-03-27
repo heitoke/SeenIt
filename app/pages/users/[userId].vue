@@ -104,7 +104,7 @@ onMounted(async () => {
     // await getUserById(String(userId));
     mode.value = 'loading';
 
-    if (!$d.alreadyLoadUser) await $d.loadUser();
+    if (!$d.alreadyFetchUse) await $d.fetchUser();
 
     mode.value = $d?._id ? 'ready' : 'no_user';
 });

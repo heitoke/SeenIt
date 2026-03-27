@@ -1,26 +1,26 @@
 // * Types
-import { type User, UserLogName } from './user';
-import { ListLogName } from './list';
-import { CategoryLogName } from './category';
-import { TitleLogName } from './title';
-import { TMDBTitleLogName } from './tmdbTitle';
+import { type User, UserLogCode } from './user';
+import { ListLogCode } from './list';
+import { CategoryLogCode } from './category';
+import { TitleLogCode } from './title';
+import { TMDBTitleLogCode } from './tmdbTitle';
 
 
-export const LogName = {
-    User: UserLogName,
-    List: ListLogName,
-    Category: CategoryLogName,
-    Title: TitleLogName,
-    TMDBTitle: TMDBTitleLogName
+export const LogCode = {
+    User: UserLogCode,
+    List: ListLogCode,
+    Category: CategoryLogCode,
+    Title: TitleLogCode,
+    TMDBTitle: TMDBTitleLogCode
 };
 
-export type LogName = UserLogName | ListLogName | CategoryLogName | TitleLogName | TMDBTitleLogName;
+export type LogCode = UserLogCode | ListLogCode | CategoryLogCode | TitleLogCode | TMDBTitleLogCode;
 
 export interface Log<UserType = string | User> {
     _id: string;
     user: UserType;
-    name: typeof LogName;
-    props: object;
+    code: number;
+    props: Record<string, any>;
     updatedAt: string;
     createdAt: string;
 }

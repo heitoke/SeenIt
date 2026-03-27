@@ -1,5 +1,5 @@
 import { createError } from 'h3';
-import { LogName } from '~~/types/db/log';
+import { LogCode } from '~~/types/db/log';
 
 // * Types
 interface Body {
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
             timestamps: true
         });
 
-        createLogs(String($user._id), LogName.Title.MoveToCategory, titles, title => {
+        createLogs(String($user._id), LogCode.Title.MoveToCategory, titles, title => {
             if (!titleIds.includes(String(title._id))) return null;
 
             return {
@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
             timestamps: true
         });
 
-        createLogs(String($user._id), LogName.Title.Like, titles, title => {
+        createLogs(String($user._id), LogCode.Title.Like, titles, title => {
             if (!titleIds.includes(String(title._id))) return null;
 
             return {
@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
             timestamps: true
         });
 
-        createLogs(String($user._id), LogName.Title.Private, titles, title => {
+        createLogs(String($user._id), LogCode.Title.Private, titles, title => {
             if (!titleIds.includes(String(title._id))) return null;
 
             return {

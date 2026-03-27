@@ -52,7 +52,14 @@
 
 import { User, ScrollText, LogOut, ScanFace } from 'lucide-vue-next';
 
-const { user, logOut } = useUserAuth();
+const { user, d: $d, logOut } = useUserAuth();
+
+
+onMounted(() => {
+    if (!$d.alreadyFetchUse) {
+        $d.fetchUser();
+    }
+});
 
 </script>
 

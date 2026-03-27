@@ -1,5 +1,9 @@
 <template>
-    <Header/>
+    <template v-if="$route.name !== 'one-tab'">
+        <Header/>
+        <Notifications/>
+        <!-- <OneTab/> -->
+    </template>
     
     <Transition name="fade">
         <NuxtPage class="page"/>
@@ -10,6 +14,12 @@
 
 // * Components
 import Header from '~/components/header/Index.vue';
+import Notifications from '~/components/notifications/Index.vue';
+// import OneTab from '~/components/oneTab/Index.vue';
+
+
+const $route = useRoute();
+
 
 useSeoMeta({
     title: 'SeenIt',

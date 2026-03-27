@@ -20,19 +20,14 @@ export const UserSchema = defineMongooseModel<User>({
         password: {
             type: String,
             minlength: 3,
+        },
+        permissions: {
+            type: Number,
+            min: 0,
+            default: 1
         }
     },
     options: {
         timestamps: true
-    },
-    hooks(schema) {
-        schema.pre('save', function(next) {
-            if (this.username && this.password) next();
-
-            throw createError({
-                statusCode: 500,
-                statusMessage: 'validation failed'
-            });
-        });
     }
 });

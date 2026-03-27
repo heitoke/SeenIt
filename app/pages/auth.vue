@@ -109,6 +109,9 @@ const $route = useRoute();
 
 const $userAuth = useUserAuth();
 
+const $onaTab = useOneTabStore();
+
+
 if ($userAuth?.user?.value?._id) {
     await navigateTo("/", { external: true });
 }
@@ -172,9 +175,11 @@ async function onAuthUser() {
 
     // @ts-ignore
     if (data.value?.loggedIn === true || data.value?.registered === true) {
-        $userAuth.me();
+        await $userAuth.me();
 
-        await navigateTo("/");
+        await navigateTo('/');
+
+        $onaTab.emitter.emit('auth:user', data.value);
     }
 }
 </script>

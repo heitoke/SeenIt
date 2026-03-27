@@ -56,8 +56,6 @@ export default defineEventHandler(async (event) => {
         method: 'GET'
     });
 
-    console.log(res)
-
     if (!res.ok) {
         throw createError({
             statusCode: 500,
@@ -66,25 +64,6 @@ export default defineEventHandler(async (event) => {
     }
 
     const json = await res.json();
-
-    // const tmdbTitleUrlMediaTemplate = `${config.tmdbApiUrl}/${mediaType === 0 ? 'movie' : 'tv'}/${tmdbId}`;
-
-    // const [dataImages, dataVideos] = await Promise.all([
-    //     tmdbTitleUrlMediaTemplate + '/images',
-    //     tmdbTitleUrlMediaTemplate + '/videos'
-    // ].map(url => fetch(url, {
-    //     headers: {
-    //         Accept: 'application/json',
-    //         Authorization: `Bearer ${config.tmdbApiKey}`
-    //     },
-    //     method: 'GET'
-    // }).then(res => {
-    //     if (!res.ok) {
-    //         throw new Error(`HTTP error! status: ${res.status}`);
-    //     }
-
-    //     return res.json();
-    // })))
 
     return json;
 });

@@ -112,8 +112,8 @@ export class DashboardTitles extends Array<DashboardTitle> {
         return this.find(title => title.tmdb?.id === tmdbId);
     }
 
-    public getTitleIdByTMDBId(tmdbId: number) {
-        return this.find(title => title.tmdb?.id === tmdbId)?._id;
+    public getTitleIdByTMDBId(tmdbId: number, mediaType: number) {
+        return this.find(title => title.tmdb?.id === tmdbId && title.tmdb.mediaType === mediaType)?._id;
     }
 
 
@@ -581,8 +581,8 @@ export class Dashboard {
     readonly categories: DashboardCategories;
     readonly titles: DashboardTitles;
 
-    public alreadyLoadUser: boolean = false;
-    public alreadyLoadUserData: boolean = false;
+    public alreadyFetchUse: boolean = false;
+    public alreadyFetchUserData: boolean = false;
 
     private selectedList: string | null = null;
 
@@ -653,7 +653,7 @@ export class Dashboard {
     }
 
 
-    async loadUser() {
+    async fetchUser() {
         const { user } = useUserAuth();
         
         if (user.value && user.value?._id === this.userId) {
@@ -666,14 +666,14 @@ export class Dashboard {
             this.user = user;
         }
 
-        this.alreadyLoadUser = true;
+        this.alreadyFetchUse = true;
 
-        await this.loadUserData();
+        await this.fetchUserData();
 
         return true;
     }
 
-    private async loadUserData() {
+    private async fetchUserData() {
         this.lists.length = 0;
         this.categories.length = 0;
         this.titles.length = 0;
@@ -694,7 +694,7 @@ export class Dashboard {
             }
         }
 
-        this.alreadyLoadUserData = true;
+        this.alreadyFetchUserData = true;
 
         return true;
     }

@@ -142,15 +142,19 @@
         </div>
 
         <div class="grid-titles" v-if="listTitles?.length > 0">
-            <TitleCard v-for="title of listTitles" :key="title._id"
-                :title="(title as DashboardTitle)"
-                :canEditHeart="$d.canEdit"
-                :disableContextMenu="!$d.canEdit"
-                :selected="$d.list?.category?.edit.enabled && $d.list.category.edit.selected.has(title._id)"
-                :showParents="categoryId === 'likes'"
+            <NuxtLink v-for="title of listTitles" :key="title._id"
+                :to="`/titles/${title._id}`"
 
                 @click="onClickTitle(title as DashboardTitle)"
-            />
+            >
+                <TitleCard
+                    :title="(title as DashboardTitle)"
+                    :canEditHeart="$d.canEdit"
+                    :disableContextMenu="!$d.canEdit"
+                    :selected="$d.list?.category?.edit.enabled && $d.list.category.edit.selected.has(title._id)"
+                    :showParents="categoryId === 'likes'"
+                />
+            </NuxtLink>
         </div>
 
         <Alert v-else>

@@ -1,8 +1,8 @@
 import { defineMongooseModel } from '#nuxt/mongoose';
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 // * Types
-import { type Log, LogName } from '~~/types/db/log';
+import { type Log, LogCode } from '~~/types/db/log';
 
 
 export const LogSchema = defineMongooseModel<Log>({
@@ -13,9 +13,8 @@ export const LogSchema = defineMongooseModel<Log>({
             ref: 'users',
             required: true
         },
-        name: {
-            type: Number,
-            minlength: 1,
+        code: {
+            type: Schema.Types.Int32,
             required: true
         },
         props: {

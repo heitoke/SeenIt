@@ -3,7 +3,7 @@ import { createError } from 'h3';
 // * Types
 import { List } from '~~/types/db/list';
 import { Category } from '~~/types/db/category';
-import { LogName } from '~~/types/db/log';
+import { LogCode } from '~~/types/db/log';
 import { Title } from '~~/types/db/title';
 
 interface Body {
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
             _id: { $in: titleIds }
         });
 
-    createLogs(String($user._id), LogName.Title.Delete, titles, ({ category, ...title }) => {
+    createLogs(String($user._id), LogCode.Title.Delete, titles, ({ category, ...title }) => {
         if (!titleIds.includes(String(title._id))) return null;
 
         return {

@@ -13,7 +13,6 @@
                     @select="selectList(String($event.value))"
                 />
 
-
                 <Popover v-if="$d.canEdit">
                     <template v-slot="{ toggle }">
                         <Button variant="secondary"
@@ -134,7 +133,7 @@ import NameField from '~/components/dialogs/NameField.vue';
 import ListSettings from '~/components/dialogs/lists/Settings.vue';
 import CategorySettings from '~/components/dialogs/categories/Settings.vue';
 
-import { EllipsisVertical, Check, ChevronsUpDown, Search, Plus, Heart, Settings2, UserRoundMinus } from 'lucide-vue-next';
+import { EllipsisVertical, Pencil, Plus, Heart, Settings2 } from 'lucide-vue-next';
 
 // * Types
 import type { User } from '~~/types/db/user';

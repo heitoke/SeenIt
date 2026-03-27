@@ -3,7 +3,7 @@ import { Category } from '~~/types/db/category';
 
 // * Types
 import { List } from '~~/types/db/list';
-import { LogName } from '~~/types/db/log';
+import { LogCode } from '~~/types/db/log';
 
 interface Body {
     ids: Array<string>;
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
             _id: { $in: categoryIds }
         });
 
-    createLogs(String($user._id), LogName.Category.Delete, categories, ({ list, ...category }) => {
+    createLogs(String($user._id), LogCode.Category.Delete, categories, ({ list, ...category }) => {
         if (!categoryIds.includes(String(category._id))) return null;
     
         return {
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
             _id: { $in: titleIds }
         });
 
-    createLogs(String($user._id), LogName.Title.Delete, titles, ({ category, ...title }) => {
+    createLogs(String($user._id), LogCode.Title.Delete, titles, ({ category, ...title }) => {
         if (!titleIds.includes(String(title._id))) return null;
     
         return {

@@ -8,7 +8,12 @@ export default defineEventHandler(async (event) => {
     const userId = event.context.params?.userId;
 
     try {
-        const user = await UserSchema.findOne({ _id: userId }).select('-password');
+        const user = await UserSchema.findOne({
+            $or: [
+                { _id: userId },
+                { username: userId }
+            ]
+        }).select('-password');
 
         if (!user) throw createError({
             statusCode: 404,

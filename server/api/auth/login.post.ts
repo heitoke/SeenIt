@@ -11,7 +11,8 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const user = await mongoose.connection.db?.collection('users').findOne({ $or: [{ email: login }, { username: login }] }); // await UserSchema.findOne({ $or: [{ email: login }, { username: login }] });
+    const user = await mongoose.connection.db?.collection('users')
+        .findOne({ $or: [{ email: login }, { username: login }] });
 
     if (!user) throw createError({
         statusCode: 404,
@@ -25,10 +26,13 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'login or password is wrong! please try again later'
     });
 
-    await $userAuth.set(event, String(user._id));
+    const data = await $userAuth.set(event, String(user._id));
+
+    const { password: _, ...loginUser } = user;
 
     return {
         loggedIn: true,
-        user
+        user: loginUser,
+        token: data.data.id
     }
 })

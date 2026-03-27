@@ -3,7 +3,7 @@ import { createError } from 'h3';
 // * Types
 import { Category } from '~~/types/db/category';
 import { List } from '~~/types/db/list';
-import { LogName } from '~~/types/db/log';
+import { LogCode } from '~~/types/db/log';
 
 export default defineEventHandler(async (event) => {
     const $user = await $userAuth.require(event);
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
 
     await category.save();
 
-    createLog(String($user._id), LogName.Category.Update, {
+    createLog(String($user._id), LogCode.Category.Update, {
         category: new LogObjectId(categoryId),
         from,
         to: {

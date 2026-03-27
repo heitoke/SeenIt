@@ -53,8 +53,10 @@ const slideIndex = ref(0);
 const groups = computed(() => {
     const list = [];
 
-    for (let i = 0; i < props.items.length; i += props.step) {
-        list.push(props.items.slice(i, i + props.step));
+    if (props.items?.length > 0) {
+        for (let i = 0; i < props.items?.length; i += props.step) {
+            list.push(props.items.slice(i, i + props.step));
+        }
     }
 
     return list;

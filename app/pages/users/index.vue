@@ -4,13 +4,7 @@
             <NuxtLink v-for="user of users" :key="user._id"
                 :to="`/u/${user._id}`"
             >
-                <div class="user">
-                    <img :src="getUrlAvatar(user._id)" alt="User Avatar">
-
-                    <div>
-                        <div class="name">{{ user.username }}</div>
-                    </div>
-                </div>
+                <UserCard :user="user"/>
             </NuxtLink>
         </div>
     </div>
@@ -18,6 +12,9 @@
 
 <script lang="ts" setup>
 
+import UserCard from '~/components/modules/card/User.vue';
+
+// * Types
 import type { User } from '~~/types/db/user';
 
 
@@ -29,8 +26,6 @@ async function getListUsers() {
     const data = await $fetch('/api/users');
 
     if (!data) return;
-
-    console.log(data);
     
     users.value = data;
 }

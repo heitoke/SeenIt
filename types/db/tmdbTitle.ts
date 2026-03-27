@@ -1,18 +1,18 @@
-export enum TMDBTitleLogName { // 401 - 500
+export enum TMDBTitleLogCode { // 401 - 500
     
 }
 
 
 export interface TMDBTitleInSearch {
+    id: number;
     adult: boolean;
     backdrop_path: string;
-    id: number;
+    poster_path: string;
     name: string;
     title: string;
     original_name: string;
     original_title: string;
     overview: string;
-    poster_path: string;
     media_type: 'tv' | 'movie';
     original_language: string;
     genre_ids: Array<number>;

@@ -1,7 +1,7 @@
 <template>
     <Popover :fixed="true" style="width: 215px;">
-        <template v-slot="{ show, hide }">
-            <slot :show="show" :hide="hide"/>
+        <template v-slot="binds">
+            <slot v-bind="binds"/>
         </template>
 
         <template #content>
@@ -9,8 +9,33 @@
                 <MenuButton @click="navigateTo(`/titles/${title._id}`)">
                     <Image/>
 
-                    <span>{{ title?.tmdb?.title || title?.tmdb?.name }}</span>
+                    <span style="max-width: 85%; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">{{ title?.tmdb?.title || title?.tmdb?.name }}</span>
                 </MenuButton>
+
+                <template v-if="!title.parentCategory?.parentList?.parentDashboard?.canEdit && user?._id">
+                    <MenuSeparator/>
+
+                    <TitleAdd v-if="!$d.titles.hasByTMDBId(title?.tmdb.id, title?.tmdb.mediaType)""
+                        :title="tmdbSearch" v-slot="{ show }"
+                    >
+                        <MenuButton @click="show">
+                            <ImagePlus/>
+
+                            <span>Добавить к себе</span>
+                        </MenuButton>
+                    </TitleAdd>
+
+                    <MenuButton v-else
+                        @click="navigateTo(`/titles/${$d.titles.getTitleIdByTMDBId(title?.tmdb.id, title?.tmdb.mediaType)}`)"
+                    >
+                        <Image style="min-width: 16px;"/>
+
+                        <div style="display: flex; flex-direction: column; align-items: start; max-width: 100%;">
+                            <span style="max-width: 100%; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">{{ title?.tmdb?.title || title?.tmdb?.name }}</span>
+                            <span style="font-size: 10px; opacity: .5;">Ваше</span>
+                        </div>
+                    </MenuButton>
+                </template>
 
                 <template v-if="title.parentCategory?.parentList?.parentDashboard?.canEdit">
                     <MenuSeparator/>
@@ -92,11 +117,14 @@
 
 // * Components
 import TitleHeart from './badges/Like.vue';
+import TitleAdd from '~/components/dialogs/titles/Add.vue';
 
-import { Heart, Eye, EyeOff, SendToBack, Trash, Image } from 'lucide-vue-next';
+// * Icons
+import { Heart, Eye, EyeOff, SendToBack, Trash, Image, ImagePlus } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
+import type { TMDBTitleInSearch } from '~~/types/db/tmdbTitle';
 
 
 interface Props {
@@ -105,8 +133,57 @@ interface Props {
 }
 
 
+const { user, d: $d } = useUserAuth();
+
+
 const props = withDefaults(defineProps<Props>(), {
     disabled: false
+});
+
+
+const tmdbSearch = computed(() => {
+    const {
+        id,
+        adult,
+        backdrop_path,
+        poster_path,
+        name,
+        title,
+        original_name,
+        original_title,
+        overview,
+        original_language,
+        genres,
+        popularity,
+        vote_average,
+        vote_count,
+        origin_country,
+        ...data
+    } = props?.title?.tmdb;
+
+    const isMovie = data.mediaType === 0;
+
+    return {
+        id,
+        media_type: isMovie ? 'movie' : 'tv',
+        adult,
+        backdrop_path,
+        poster_path,
+        name,
+        title,
+        original_name,
+        original_title,
+        overview,
+        original_language,
+        genres,
+        popularity,
+        vote_average,
+        vote_count,
+        origin_country,
+        first_air_date: isMovie ? '' : data.first_air_date,
+        release_date: isMovie ? data.release_date : '',
+        genre_ids: []
+    } as TMDBTitleInSearch;
 });
 
 </script>

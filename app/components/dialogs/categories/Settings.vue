@@ -11,8 +11,8 @@
         <template v-if="category"
             v-slot:content="{ hide }"
         >
-            <div style="width: 376px;">
-                <Input v-model:value="category.name"/>
+            <div>
+                <Input v-model:value="category.name" style="width: 100%;"/>
 
                 <Checkbox name="view-mode-list" :label="$t('privateMode')"
                     style="margin: 12px 0;"

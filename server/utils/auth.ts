@@ -12,6 +12,12 @@ class UserAuth {
         return data.id;
     }
 
+    async getData(event: H3Event) {
+        const data = await $useSession(event);
+
+        return data;
+    }
+
     async set(event: H3Event, userId: string) {
         const token = await createJWT(userId);
 

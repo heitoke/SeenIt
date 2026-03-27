@@ -6,7 +6,7 @@ const useUserSessionState = () => useState<Partial<User>>('nuxt-mongoose-auth', 
 
 
 async function me() {
-    useUserSessionState().value = await useRequestFetch()('/api/auth/me', {
+    return useUserSessionState().value = await useRequestFetch()('/api/auth/me', {
         headers: {
             Accept: 'text/json'
         }
@@ -25,7 +25,7 @@ export function useUserAuth() {
     const dashboards = useDashboardsStore();
 
     return {
-        loggedIn: computed(() => Boolean(sessionState.value?.email)),
+        loggedIn: computed(() => Boolean(sessionState.value?._id)),
         user: computed(() => sessionState.value || null),
         d: dashboards.get(String(sessionState.value?._id)),
         logOut,

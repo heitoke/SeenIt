@@ -1,11 +1,13 @@
+import { makeCode } from '.';
+
 // * Types
 import type { List } from './list';
 import type { DataTitle } from './title';
 
 
-export enum CategoryLogName { // 201 - 300
-    Update = 201,
-    Delete = 202
+export enum CategoryLogCode {
+    Update = makeCode(3, 1, 1),
+    Delete = makeCode(3, 1, 2)
 }
 
 export interface Category<ListType = string | List> {

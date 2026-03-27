@@ -10,10 +10,28 @@
                     <Star :size="14" style="fill: yellow; stroke: yellow;"/>
                     <span>{{ data?.vote_average?.toFixed(1) }}/<span>{{ data?.vote_count }}</span></span>
                 </div>
+
+                <BadgeParent :title="title!"/>
             </div>
 
             <div class="badges right">
-                <div><BadgeLike :size="14" :step="title?.liked"/></div>
+                <BadgePrivate v-if="title?.private"
+                    :size="14"
+                />
+
+                <BadgeLike
+                    :size="14"
+                    :step="title?.liked"
+                    :canEdit="title?.parentCategory?.parentList?.parentDashboard?.canEdit"
+
+                    @updateStep="title?.like($event)"
+                />
+                
+                <TitleContext :title="title!" v-slot="{ toggle }">
+                    <div class="badge" style="cursor: pointer;" @click.stop.prevent="toggle">
+                        <EllipsisVertical :size="14"/>
+                    </div>
+                </TitleContext>
             </div>
 
             <div class="details">
@@ -44,13 +62,16 @@
 <script lang="ts" setup>
 
 // * Components
+import Image from '~/components/ui/Image.vue';
+import BadgeLike from '~/components/modules/titles/badges/Like.vue';
+import BadgePrivate from '~/components/modules/titles/badges/Private.vue';
+import BadgeParent from '~/components/modules/titles/badges/Parent.vue';
+import TitleContext from '~/components/modules/titles/Context.vue';
 import GroupSeasons from '~/components/modules/pages/title/GroupSeasons.vue';
 import GroupMedia from '~/components/modules/pages/title/GroupMedia.vue';
 import GroupRecommendations from '~/components/modules/pages/title/GroupRecommendations.vue';
-import BadgeLike from '~/components/modules/titles/badges/Like.vue';
-import Image from '~/components/ui/Image.vue';
 
-import { Star } from 'lucide-vue-next';
+import { EllipsisVertical, Star } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
@@ -76,7 +97,7 @@ async function loadTitle(titleId: string) {
 
     const $d = $dashboards.get(data.category.list.user._id);
 
-    if (!$d.alreadyLoadUser) await $d.loadUser();
+    if (!$d.alreadyFetchUse) await $d.fetchUser();
 
     const cacheTitle = await $d.titles.get(String(data?._id));
 
@@ -121,19 +142,22 @@ onMounted(() => {
         position: absolute;
         top: 24px;
         align-items: center;
-        gap: 4px;
+        z-index: 2;
 
         &.left {
             left: 24px;
+            gap: 4px;
 
             & > div {
                 display: flex;
                 padding: 4px 8px;
                 height: 24px;
                 color: var(--hx-text-primary);
-                font-size: 12px;
                 border-radius: var(--hx-border-radius);
+                font-size: 12px;
                 align-items: center;
+                background-color: #00000045;
+                backdrop-filter: blur(5px);
                 box-sizing: border-box;
 
                 &.media {
@@ -152,25 +176,39 @@ onMounted(() => {
                     }
                 }
             }
+
+            :deep(.parent) {
+                padding: 0 8px;
+                height: 24px;
+                position: absolute;
+                top: 28px;
+                left: 0;
+                font-size: 12px;
+                line-height: 24px;
+                box-sizing: border-box;
+                z-index: 2;
+            }
         }
 
         &.right {
             right: 24px;
+            border-radius: var(--hx-border-radius);
+            background-color: #00000045;
+            backdrop-filter: blur(5px);
+            overflow: hidden;
 
-            & > div {
+            :deep(.badge) {
                 display: flex;
                 width: 24px;
                 height: 24px;
                 text-transform: uppercase;
                 align-items: center;
                 justify-content: center;
-                border-radius: var(--hx-border-radius);
-            }
-        }
 
-        & > div {
-            background-color: #00000045;
-            backdrop-filter: blur(5px);
+                &:hover {
+                    background-color: #00000045;
+                }
+            }
         }
     }
 

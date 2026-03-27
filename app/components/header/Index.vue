@@ -14,6 +14,13 @@
         <div style="margin-left: auto;"></div>
 
         <Language/>
+        
+        <div class="open-notifications" v-if="user?._id"
+            @click="$notifications.setOpen()"
+        >
+            <Bell :size="14"/>
+        </div>
+
         <Account/>
     </header>
 </template>
@@ -23,6 +30,13 @@
 // * Components
 import Account from './Account.vue';
 import Language from './Language.vue';
+
+import { Bell } from 'lucide-vue-next';
+
+
+const { $notifications } = useNotificationsStore();
+
+const { user } = useUserAuth();
 
 </script>
 
@@ -64,6 +78,16 @@ header {
 
     &:hover {
         text-decoration: underline;
+        opacity: 1;
+    }
+}
+
+.open-notifications {
+    cursor: pointer;
+    transition: .2s;
+    opacity: .5;
+
+    &:hover {
         opacity: 1;
     }
 }

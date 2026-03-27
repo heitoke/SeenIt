@@ -1,5 +1,5 @@
 <template>
-    <div class="group-media">
+    <div class="group-media" v-if="Object.keys(media).length > 0">
         <h2>Медиа</h2>
 
         <ButtonGroup style="margin: 12px 0; justify-content: start;">
@@ -52,7 +52,6 @@
                             </ButtonGroup>
 
                             <div></div>
-
                         </div>
                     </template>
                 </Dialog>

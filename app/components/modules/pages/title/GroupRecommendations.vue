@@ -9,7 +9,7 @@
         >
             <template #item="{ item: title, index }">
                 <NuxtLink v-if="$d.titles.hasByTMDBId(title.id, title.media_type === 'movie' ? 0 : 1)"
-                    :to="`/titles/${$d.titles.getTitleIdByTMDBId(title.id)}`"
+                    :to="`/titles/${$d.titles.getTitleIdByTMDBId(title.id, title.media_type === 'movie' ? 0 : 1)}`"
                 >
                     <TitleCard
                         :title="$d.titles.getByTMDBId(title.id)!"
@@ -19,125 +19,39 @@
                     />
                 </NuxtLink>
 
-                <Dialog v-else
-                    :title="title?.name || title?.title"
-                    :description="title?.overview"
-                    style="max-width: 512px;"
+                <TitleAdd v-slot="{ show }" v-else
+                    :title="title"
                 >
-                    <template #default="{ show }">
-                        <div @click="show">
-                            <div class="image">
-                                <div class="media">
-                                    <span>{{ $t(title.media_type) }}</span>
-                                </div>
-
-                                <Image
-                                    :src="getImageTMDB(title?.poster_path)"
-                                    alt="Title Poster"
-                                />
+                    <div @click="show">
+                        <div class="image">
+                            <div class="media">
+                                <span>{{ $t(title.media_type) }}</span>
                             </div>
 
-                            <div class="details">
-                                <div class="name">{{ title?.name ?? title?.title }}</div>
-
-                                <ul>
-                                    <li v-if="title?.vote_average > 0">
-                                        <Star :size="10" color="yellow"/>
-                                        <span>{{ title?.vote_average.toFixed(1) }}/{{ title?.vote_count }}</span>
-                                    </li>
-
-                                    <li>
-                                        <Calendar :size="10"/>
-
-                                        <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #title>
-                        <div style="display: flex; position: relative; gap: 12px;">
-                            <Image :src="getImageTMDB(title.poster_path)"
-                                style="width: 30%; height: 256px; border-radius: var(--hx-border-radius);"
-                            />
-
-                            <Image :src="getImageTMDB(title.backdrop_path)"
-                                style="width: 70%; height: 256px; border-radius: var(--hx-border-radius);"
+                            <Image
+                                :src="getImageTMDB(title?.poster_path)"
+                                alt="Title Poster"
                             />
                         </div>
 
-                        <h3 style="display: flex; margin-top: 12px; align-items: center;">
-                            <span>{{ title?.name || title?.title }}</span>
+                        <div class="details">
+                            <div class="name">{{ title?.name ?? title?.title }}</div>
 
-                            <span style="margin-left: 12px; padding: 0 6px; height: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; line-height: 20px; color: var(--hx-text-primary); border-radius: var(--hx-border-radius); background-color: #00000045; box-sizing: border-box;">{{ $t(title.media_type) }}</span>
-                        </h3>
-                    </template>
-
-                    <template #content>
-                        <div>
-                            <ButtonGroup>
-                                <Button :disabled="true" variant="secondary">
-                                    <Star :size="10" style="fill: yellow; stroke: yellow;"/>
-
+                            <ul>
+                                <li v-if="title?.vote_average > 0">
+                                    <Star :size="10" color="yellow"/>
                                     <span>{{ title?.vote_average.toFixed(1) }}/{{ title?.vote_count }}</span>
-                                </Button>
+                                </li>
 
-                                <Button :disabled="true" variant="secondary">
+                                <li>
                                     <Calendar :size="10"/>
 
                                     <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
-                                </Button>
-
-                                <Popover side="top">
-                                    <template #default="{ toggle, isOpened }">
-                                        <Button @click="toggle">
-                                            <Plus :size="12" v-if="!isOpened"/>
-                                            <ChevronDown v-else/>
-                                            Добавить в список
-                                        </Button>
-                                    </template>
-
-                                    <template #content>
-                                        <div style="min-width: 169px;">
-                                            <Select :placeholder="$t('selectList')"
-                                                :options="$d.lists.map(list => ({
-                                                    label: list.name,
-                                                    value: list._id
-                                                }))"
-
-                                                @select="selectedList = String($event.value)"
-                                            />
-
-                                            <div style="margin: 8px 0;"></div>
-
-                                            <Select
-                                                :placeholder="$t('selectCategory')"
-                                                :disabled="!selectedList"
-                                                :options="$d.categories.map(category => ({
-                                                    label: category.name,
-                                                    value: category._id
-                                                }))"
-
-                                                @select="selectedCategory = String($event.value)"
-                                            />
-
-                                            <div style="margin: 8px 0;"></div>
-                                            
-                                            <Button style="width: 100%;"
-                                                :disabled="!selectedList || !selectedCategory || !canAddInCategory"
-
-                                                @click="onClickAdd(title)"
-                                            >
-                                                Добавить
-                                            </Button>
-                                        </div>
-                                    </template>
-                                </Popover>
-                            </ButtonGroup>
+                                </li>
+                            </ul>
                         </div>
-                    </template>
-                </Dialog>
+                    </div>
+                </TitleAdd>
             </template>
         </Carousel>
     </div>
@@ -147,9 +61,10 @@
 
 // * Components
 import TitleCard from '~/components/modules/titles/Card.vue';
+import TitleAdd from '~/components/dialogs/titles/Add.vue';
 import Image from '~/components/ui/Image.vue';
 import Carousel from '~/components/ui/Carousel.vue';
-import { Star, Plus, Calendar, ChevronDown } from 'lucide-vue-next';
+import { Star, Calendar } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
@@ -166,10 +81,6 @@ const props = defineProps<{
 
 const list = ref<Array<TMDBTitleInSearch>>([]);
 
-const selectedList = ref<string | null>(null);
-const selectedCategory = ref<string | null>(null);
-const canAddInCategory = ref(true);
-
 
 
 async function fetchTitleRecommendations(titleId: string) {
@@ -180,21 +91,6 @@ async function fetchTitleRecommendations(titleId: string) {
     list.value = data;
 }
 
-async function onClickAdd(tmdbTitle: TMDBTitleInSearch) {
-    if (!selectedList.value || !selectedCategory.value || !canAddInCategory.value) return;
-
-    const category = $d.categories.get(selectedCategory.value);
-
-    if (!category) return;
-
-    if (category.parentList?._id !== selectedList.value) return;
-
-    canAddInCategory.value = false;
-
-    await category.add(tmdbTitle);
-
-    canAddInCategory.value = true;
-}
 
 onMounted(() => {
     fetchTitleRecommendations(props.title._id);

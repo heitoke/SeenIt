@@ -4,7 +4,7 @@
 
         <Carousel class="seasons" :inset="true" :items="data.seasons" :step="6" :gap="12">
             <template #item="{ item: season, index }">
-                <div @click="selectSeason(index)">
+                <div @click="selectSeason(season.season_number)">
                     <div class="image">
                         <Image
                             :src="season?.poster_path ? `${$config.public.tmdbImageUrl}/t/p/original${season?.poster_path}` : null"

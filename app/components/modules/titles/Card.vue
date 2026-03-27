@@ -15,17 +15,9 @@
                     <span>{{ $t(data?.mediaType === 0 ? 'movie' : 'tv') }}</span>
                 </div>
 
-                <Tooltip v-if="showParents">
-                    <template #trigger>
-                        <div class="parents">В <b>{{ title.parentCategory?.name }}</b></div>
-                    </template>
-
-                    <template #default>
-                        Список: <b>{{ title?.parentCategory?.parentList?.name }}</b>
-                        <br>
-                        Категория: <b>{{ title?.parentCategory?.name }}</b>
-                    </template>
-                </Tooltip>
+                <Parent v-if="showParents"
+                    :title="title"
+                />
                 
                 <div class="badges">
                     <BadgePrivate v-if="title.private"/>
@@ -33,7 +25,7 @@
                     <BadgeLike v-if="title.liked > 0"
                         :size="12"
                         :step="title.liked"
-                        :disabledTooltip="!canEditHeart"
+                        :canEdit="canEditHeart"
 
                         @updateStep="title.like($event)"
                         @click.prevent.stop=""
@@ -89,6 +81,7 @@ import { Timer, Star, EyeOff, Calendar } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
+import Parent from './badges/Parent.vue';
 
 
 const $config = useRuntimeConfig();
@@ -160,7 +153,7 @@ const titleRuntime = computed(() => {
         .image {
             .media,
             .badges,
-            :deep(.parents) {
+            :deep(.parent) {
                 opacity: 1;
             }
         }
@@ -201,27 +194,12 @@ const titleRuntime = computed(() => {
             z-index: 2;
         }
 
-        :deep(.parents) {
-            padding: 0 6px;
-            max-width: 50%;
-            height: 20px;
+        :deep(.parent) {
             position: absolute;
             top: 28px;
             left: 4px;
             font-size: 10px;
-            font-weight: 700;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            line-height: 20px;
-            color: var(--hx-text-primary);
-            border-radius: var(--hx-border-radius);
-            background-color: #00000045;
-            backdrop-filter: blur(5px);
-            box-sizing: border-box;
-            transition: .2s;
             opacity: .5;
-            overflow: hidden;
-            z-index: 2;
         }
 
         .badges {
