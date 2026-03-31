@@ -6,10 +6,12 @@ import type { TMDBTitle } from './tmdbTitle';
 
 
 export enum TitleLogCode { // 301 - 400
-    MoveToCategory = makeCode(4, 1, 1), // 3.0.0.0
-    Like = makeCode(4, 1, 2), // 3.0.1.0
-    Private = makeCode(4, 1, 3), // 3.0.2.0
-    Delete = makeCode(4, 1, 4)
+    MoveToCategory = makeCode(4, 1, 1),
+    Like = makeCode(4, 1, 2),
+    Private = makeCode(4, 1, 3),
+    Delete = makeCode(4, 1, 4),
+    Rating = makeCode(4, 1, 5),
+    ChangeStatusEpisode = makeCode(4, 1, 6)
 }
 
 export interface Title<CategoryType = string | Category, TMDBTitleType = string | TMDBTitle> {

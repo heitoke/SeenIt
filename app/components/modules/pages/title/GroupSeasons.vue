@@ -21,7 +21,7 @@
                             <span>{{ season.episode_count }}</span>
                         </li>
 
-                        <li>
+                        <li v-if="season?.air_date">
                             <Calendar :size="10"/>
 
                             <span>{{ new Date(season.air_date).getFullYear() }}</span>
@@ -32,41 +32,59 @@
         </Carousel>
 
         <AnimationHeight :showed="selectedSeason > -1 && season !== null">
-            <div @click="selectedSeason = -1" style="margin-top: 12px;">
+            <div style="margin-top: 12px;">
                 <h2>Эпизоды ({{ season?.episodes.length }})</h2>
 
                 <Carousel class="episodes" :inset="true" :items="season!.episodes" :step="4" :gap="12">
                     <template #item="{ item: episode, index }">
-                        <div @click="selectSeason(index)">
-                            <div class="image">
-                                <Image
-                                    :src="getImageTMDB(episode?.still_path)"
-                                    alt="Season Poster"
-                                />
-                            </div>
+                        <Popover>
+                            <template v-slot="{ toggle }">
+                                <div @contextmenu.stop.prevent="toggle">
+                                    <div class="image">
+                                        <Image
+                                            :src="getImageTMDB(episode?.still_path)"
+                                            alt="Season Poster"
+                                        />
 
-                            <div class="name">{{ episode.name }}</div>
+                                        <div class="status" v-if="season && (title?.seasons[season?.season_number] && title?.seasons[season?.season_number!]![episode?.episode_number]?.status > 0)">
+                                            {{ $t(`categoryTypes.${title?.seasons[season?.season_number]![episode?.episode_number]?.status}`) }}
+                                        </div>
+                                    </div>
 
-                            <ul>
-                                <li>
-                                    <Timer :size="10"/>
+                                    <div class="name">{{ episode.name }}</div>
 
-                                    <span>{{ runtimeToHM(episode.runtime) }}</span>
-                                </li>
+                                    <ul>
+                                        <li>
+                                            <Timer :size="10"/>
 
-                                <li>
-                                    <Star :size="10" style="fill: yellow; stroke: yellow;"/>
+                                            <span>{{ runtimeToHM(episode.runtime) }}</span>
+                                        </li>
 
-                                    <span>{{ episode?.vote_average.toFixed(1) }}/{{ episode?.vote_count }}</span>
-                                </li>
+                                        <li>
+                                            <Star :size="10" style="fill: yellow; stroke: yellow;"/>
 
-                                <li>
-                                    <Calendar :size="10"/>
+                                            <span>{{ episode?.vote_average.toFixed(1) }}/{{ episode?.vote_count }}</span>
+                                        </li>
 
-                                    <span>{{ new Date(episode.air_date).toDateString() }}</span>
-                                </li>
-                            </ul>
-                        </div>
+                                        <li v-if="episode?.air_date">
+                                            <Calendar :size="10"/>
+
+                                            <span>{{ new Date(episode.air_date).toDateString() }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <template #content>
+                                <Menu>
+                                    <MenuButton v-for="(_, i) of new Array(6)" :key="i"
+                                        @click="title?.setEpisodeStatus(season?.season_number!, episode?.episode_number!, i)"
+                                    >
+                                        <span>{{ $t(`categoryTypes.${i}`) }}</span>
+                                    </MenuButton>
+                                </Menu>
+                            </template>
+                        </Popover>
                     </template>
                 </Carousel>
             </div>
@@ -84,6 +102,7 @@ import { Star, Timer, Calendar } from 'lucide-vue-next';
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
 import type { Season } from '~~/types/db/tmdbTitle';
+import { CategoryType } from '~~/types/db/category';
 
 
 const $config = useRuntimeConfig();
@@ -203,9 +222,9 @@ async function selectSeason(seasonNumber: number) {
             border-radius: var(--hx-border-radius);
             
             .image {
+                padding-bottom: 196px;
                 width: 100%;
                 position: relative;
-                padding-bottom: 196px;
                 border-radius: var(--hx-border-radius);
                 overflow: hidden;
                 transition: .2s;
@@ -217,6 +236,23 @@ async function selectSeason(seasonNumber: number) {
                     object-fit: cover;
                     object-position: center;
                     z-index: 1;
+                }
+
+                .status {
+                    position: absolute;
+                    top: 4px;
+                    right: 4px;
+                    display: flex;
+                    padding: 4px 8px;
+                    height: 24px;
+                    color: var(--hx-text-primary);
+                    border-radius: var(--hx-border-radius);
+                    font-size: 12px;
+                    align-items: center;
+                    background-color: #00000045;
+                    backdrop-filter: blur(5px);
+                    box-sizing: border-box;
+                    z-index: 2;
                 }
             }
 

@@ -9,7 +9,7 @@
             >
                 <Heart
                     :size="size"
-                    :style="step > 0 ? `fill: ${currentStepColor}; stroke: ${currentStepColor};` : ''"
+                    :style="`fill: hsl(0, ${step * 25}%, 43.5%); stroke: hsl(0, ${step * 25}%, 43.5%);`"
                 />
             </div>
         </template>
@@ -20,13 +20,12 @@
                     <span>{{ $t('liked') }}?</span>
 
                     <div>
-                        <div v-for="(_, i) of new Array(5)" :key="i"
+                        <div v-for="(_, i) of new Array(6)" :key="i"
                             :style="{ backgroundColor: step > 0 && step === i ? 'var(--hx-background-primary)' : '' }"
                             
                             @click="$emit('updateStep', i)"
                         >
-                            <Heart :size="14" v-if="i > 0" :style="`fill: ${steps[i]}; stroke: ${steps[i]};`"/>
-                            <HeartOff :size="14" v-else/>
+                            <Heart :size="14" :style="`fill: hsl(0, ${i * 25}%, 43.5%); stroke: hsl(0, ${i * 25}%, 43.5%);`"/>
                         </div>
                     </div>
                 </template>
@@ -34,7 +33,7 @@
                 <template v-else>
                     <Heart
                         :size="14"
-                        :style="step > 0 ? `fill: ${currentStepColor}; stroke: ${currentStepColor};` : ''"
+                        :style="`fill: hsl(0, ${step * 25}%, 43.5%); stroke: hsl(0, ${step * 25}%, 43.5%);`"
                     />
 
                     <span>{{ $t('liked') }} - {{ step }}</span>
@@ -46,7 +45,7 @@
 
 <script lang="ts" setup>
 
-import { Heart, HeartOff } from 'lucide-vue-next';
+import { Heart } from 'lucide-vue-next';
 
 
 interface Props {
@@ -72,16 +71,16 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 
-const steps = [
-    '',
-    '#ffbbad',
-    '#ff917a',
-    '#ff6647',
-    '#ff3b14'
-];
+// const steps = [
+//     '',
+//     '#ffbbad',
+//     '#ff917a',
+//     '#ff6647',
+//     '#ff3b14'
+// ];
 
 
-const currentStepColor = computed(() => steps[props.step]);
+// const currentStepColor = computed(() => steps[props.step]);
 
 </script>
 

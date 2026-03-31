@@ -2,7 +2,7 @@ import { defineMongooseModel } from '#nuxt/mongoose';
 import { Schema } from 'mongoose';
 
 // * Types
-import { Category } from '~~/types/db/category';
+import { type Category, CategoryType } from '~~/types/db/category';
 
 
 export const CategorySchema = defineMongooseModel<Category>({
@@ -21,6 +21,12 @@ export const CategorySchema = defineMongooseModel<Category>({
             type: Boolean,
             default: false
         },
+        type: {
+            type: Number,
+            enum: Object.keys(CategoryType).map(Number).filter(t => !isNaN(t)),
+            default: CategoryType.None,
+            required: true
+        }
     },
     options: {
         timestamps: true,

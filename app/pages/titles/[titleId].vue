@@ -19,7 +19,15 @@
                     :size="14"
                 />
 
-                <BadgeLike
+                <BadgeRating v-if="title?.rating && title?.rating > 0"
+                    :size="14"
+                    :step="title?.rating"
+                    :canEdit="title?.parentCategory?.parentList?.parentDashboard?.canEdit"
+
+                    @updateStep="title?.rated($event)"
+                />
+
+                <BadgeLike v-if="title?.liked && title?.liked > 0"
                     :size="14"
                     :step="title?.liked"
                     :canEdit="title?.parentCategory?.parentList?.parentDashboard?.canEdit"
@@ -64,6 +72,7 @@
 // * Components
 import Image from '~/components/ui/Image.vue';
 import BadgeLike from '~/components/modules/titles/badges/Like.vue';
+import BadgeRating from '~/components/modules/titles/badges/Rating.vue';
 import BadgePrivate from '~/components/modules/titles/badges/Private.vue';
 import BadgeParent from '~/components/modules/titles/badges/Parent.vue';
 import TitleContext from '~/components/modules/titles/Context.vue';
@@ -117,6 +126,8 @@ onMounted(() => {
     if (!cacheTitle) return loadTitle(titleId);
 
     title.value = cacheTitle;
+
+    cacheTitle?.getStatusEpisodes();
 });
 
 </script>
@@ -179,6 +190,7 @@ onMounted(() => {
 
             :deep(.parent) {
                 padding: 0 8px;
+                max-width: 100%;
                 height: 24px;
                 position: absolute;
                 top: 28px;

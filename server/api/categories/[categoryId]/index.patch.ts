@@ -5,12 +5,13 @@ import { Category } from '~~/types/db/category';
 import { List } from '~~/types/db/list';
 import { LogCode } from '~~/types/db/log';
 
+
 export default defineEventHandler(async (event) => {
     const $user = await $userAuth.require(event);
 
     const categoryId = await getRouterParam(event, 'categoryId');
 
-    const { name, private: privateMode } = await readBody<Partial<Pick<Category, 'name' | 'private'>>>(event);
+    const { name, private: privateMode, type } = await readBody<Partial<Pick<Category, 'name' | 'private' | 'type'>>>(event);
 
     const category = await CategorySchema
         .findOne({ _id: String(categoryId) })
@@ -32,11 +33,13 @@ export default defineEventHandler(async (event) => {
 
     const from = {
         name: category.name,
-        private: category.private
+        private: category.private,
+        type: category.type
     }
 
     if (name) category.name = name;
     if (privateMode !== undefined) category.private = privateMode;
+    if (type !== undefined) category.type = type;
 
     await category.save();
 
@@ -45,7 +48,8 @@ export default defineEventHandler(async (event) => {
         from,
         to: {
             name: category.name,
-            private: category.private
+            private: category.private,
+            type: category.type
         }
     });
 

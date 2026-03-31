@@ -1,5 +1,5 @@
 <template>
-    <Dialog
+    <Dialog style="min-width: 315px;"
         :title="category && category?.name"
 
         @update:open="onOpen"
@@ -11,26 +11,36 @@
         <template v-if="category"
             v-slot:content="{ hide }"
         >
-            <div>
-                <Input v-model:value="category.name" style="width: 100%;"/>
+            <Input v-model:value="category.name" style="width: 100%;"/>
 
-                <Checkbox name="view-mode-list" :label="$t('privateMode')"
-                    style="margin: 12px 0;"
-                    v-model="category.private"
-                />
+            <Checkbox name="view-mode-list" :label="$t('privateMode')"
+                style="margin: 12px 0;"
+                v-model="category.private"
+            />
 
-                <ButtonGroup>
-                    <Button variant="destructive" @click="onDelete(hide)">
-                        <Trash/>
-                        <span>{{ $t('delete') }}</span>
-                    </Button>
+            <Label>{{ $t('typeCategory') }}</Label>
 
-                    <Button @click="onSave(hide)">
-                        <Save/>
-                        <span>{{ $t('save') }}</span>
-                    </Button>
-                </ButtonGroup>
-            </div>
+            <Select :placeholder="$t('selectTypeCategory')"
+                :value="category?.type || 0"
+                :options="Object.keys(CategoryType).filter(t => !isNaN(Number(t))).map(t => ({
+                    label: $t(`categoryTypes.${t}`),
+                    value: Number(t)
+                }))"
+
+                @select="category.type = Number($event.value)"
+            />
+
+            <ButtonGroup>
+                <Button variant="destructive" @click="onDelete(hide)">
+                    <Trash/>
+                    <span>{{ $t('delete') }}</span>
+                </Button>
+
+                <Button @click="onSave(hide)">
+                    <Save/>
+                    <span>{{ $t('save') }}</span>
+                </Button>
+            </ButtonGroup>
         </template>
     </Dialog>
 </template>
@@ -40,8 +50,7 @@
 import { Save, Trash } from 'lucide-vue-next';
 
 // * Types
-import type { List } from '~~/types/db/list';
-import type { Category } from '~~/types/db/category';
+import { type Category, CategoryType } from '~~/types/db/category';
 
 
 const $dashboards = useDashboardsStore();
@@ -75,11 +84,12 @@ function onOpen(bool: boolean) {
 async function onSave(hide: () => void) {
     if (!category.value) return;
 
-    const { name, private: privateMode } = category.value;
+    const { name, private: privateMode, type } = category.value;
 
     const result = await $d.categories.get(category.value._id)?.update({
         name,
-        private: privateMode
+        private: privateMode,
+        type
     });
 
     if (!result) return;

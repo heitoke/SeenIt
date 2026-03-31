@@ -21,7 +21,14 @@
                 
                 <div class="badges">
                     <BadgePrivate v-if="title.private"/>
-                    <BadgeRating v-if="title.rating > 0"/>
+                    <BadgeRating v-if="title.rating > 0"
+                        :size="12"
+                        :step="title.rating"
+                        :canEdit="canEditHeart"
+
+                        @updateStep="title.rated($event)"
+                        @click.prevent.stop=""    
+                    />
                     <BadgeLike v-if="title.liked > 0"
                         :size="12"
                         :step="title.liked"

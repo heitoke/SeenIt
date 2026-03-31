@@ -142,19 +142,15 @@
         </div>
 
         <div class="grid-titles" v-if="listTitles?.length > 0">
-            <NuxtLink v-for="title of listTitles" :key="title._id"
-                :to="`/titles/${title._id}`"
+            <TitleCard v-for="title of listTitles" :key="title._id"
+                :title="(title as DashboardTitle)"
+                :canEditHeart="$d.canEdit"
+                :disableContextMenu="!$d.canEdit"
+                :selected="$d.list?.category?.edit.enabled && $d.list.category.edit.selected.has(title._id)"
+                :showParents="categoryId === 'likes'"
 
-                @click="onClickTitle(title as DashboardTitle)"
-            >
-                <TitleCard
-                    :title="(title as DashboardTitle)"
-                    :canEditHeart="$d.canEdit"
-                    :disableContextMenu="!$d.canEdit"
-                    :selected="$d.list?.category?.edit.enabled && $d.list.category.edit.selected.has(title._id)"
-                    :showParents="categoryId === 'likes'"
-                />
-            </NuxtLink>
+                @click.prevent="onClickTitle(title as DashboardTitle)"
+            />
         </div>
 
         <Alert v-else>
@@ -182,6 +178,7 @@ import type { TMDBTitleInSearch } from '~~/types/db/tmdbTitle';
 import type { DashboardTitle } from '~/libs/dashboard';
 
 
+const $router = useRouter();
 const $route = useRoute();
 
 
@@ -234,7 +231,7 @@ async function addTitles(titles: Array<TMDBTitleInSearch>) {
 
 
 function onClickTitle(title: DashboardTitle) {
-    if (!$d.list || !$d.list?.category?.edit.enabled) return navigateTo(`/titles/${title._id}`);
+    if (!$d.list || !$d.list?.category?.edit.enabled) return $router.push(`/titles/${title._id}`);
 
     $d.list.category.edit.selected[$d.list.category.edit.selected.has(title._id) ? 'delete' : 'add'](title._id);
 }

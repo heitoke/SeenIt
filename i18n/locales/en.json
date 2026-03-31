@@ -68,5 +68,16 @@
     "posters": "Posters",
     "backdrops": "Backdrops",
     "videos": "Videos",
-    "close": "Close"
+    "close": "Close",
+    "typeCategory": "Type of category",
+    "selectTypeCategory": "Select the type of category",
+    "categoryTypes": [
+        "None",
+        "Watched",
+        "Watching",
+        "Planned",
+        "Paused",
+        "Dropped"
+    ],
+    "rating": "Rating"
 }

@@ -47,12 +47,35 @@
                         </template>
 
                         <template #content>
-                            <MenuButton v-for="(_, i) of new Array(5)" :key="i"
+                            <MenuButton v-for="(_, i) of new Array(6)" :key="i"
                                 @click="title.like(i)"
                             >
-                                <TitleHeart :size="14" :step="i" :disabled-tooltip="true"/>
+                                <Heart
+                                    :size="14"
+                                    :style="`fill: hsl(0, ${i * 25}%, 43.5%); stroke: hsl(0, ${i * 25}%, 43.5%);`"
+                                />
                                 
                                 <span>{{ $t(i > 0 ? 'liked' : 'unliked') }} - {{ i }}</span>
+                            </MenuButton>
+                        </template>
+                    </MenuChildren>
+
+                    <MenuChildren>
+                        <template #default>
+                            <Star style="margin-right: 8px;"/>
+                            <span>{{ $t('rating') }}</span>
+                        </template>
+
+                        <template #content>
+                            <MenuButton v-for="(_, i) of new Array(11)" :key="i"
+                                @click="title.rated(i)"
+                            >
+                                <Star
+                                    :size="14"
+                                    :style="`fill: hsl(53.5, ${i * 10}%, 62.5%); stroke: hsl(53.5, ${i * 10}%, 62.5%);`"
+                                />
+                                
+                                <span>{{ $t('rating') }} - {{ i }}</span>
                             </MenuButton>
                         </template>
                     </MenuChildren>
@@ -120,7 +143,7 @@ import TitleHeart from './badges/Like.vue';
 import TitleAdd from '~/components/dialogs/titles/Add.vue';
 
 // * Icons
-import { Heart, Eye, EyeOff, SendToBack, Trash, Image, ImagePlus } from 'lucide-vue-next';
+import { Star, Heart, Eye, EyeOff, SendToBack, Trash, Image, ImagePlus } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';

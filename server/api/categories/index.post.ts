@@ -1,5 +1,8 @@
 import { createError } from 'h3';
 
+// * Types
+import { CategoryType } from '~~/types/db/category';
+
 interface Body {
     listId: string;
     name: string;
@@ -24,7 +27,8 @@ export default defineEventHandler(async (event) => {
     const newCategory = await new CategorySchema({
         list: listId,
         name,
-        private: privateMode
+        private: privateMode,
+        type: CategoryType.None
     });
     
     await newCategory.save();

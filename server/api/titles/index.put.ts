@@ -3,7 +3,7 @@ import { LogCode } from '~~/types/db/log';
 
 // * Types
 interface Body {
-    action: 'like' | 'private' | 'move';
+    action: 'like' | 'rating' | 'private' | 'move';
     ids: Array<number>;
     value: number | string | boolean
 }
@@ -72,6 +72,28 @@ export default defineEventHandler(async (event) => {
         });
 
         return { success: true, likedTitles: titleIds };
+    }  else if (action === 'rating') {
+        const result = await TitleSchema.updateMany({
+            _id: { $in: titleIds }
+        }, {
+            $set: {
+                rating: Number(value)
+            }
+        }, {
+            timestamps: true
+        });
+
+        createLogs(String($user._id), LogCode.Title.Rating, titles, title => {
+            if (!titleIds.includes(String(title._id))) return null;
+
+            return {
+                title: new LogObjectId(title._id),
+                from: title.rating,
+                to: Number(value)
+            }
+        });
+
+        return { success: true, ratedTitles: titleIds };
     } else if (action === 'private') {
         const result = await TitleSchema.updateMany({
             _id: { $in: titleIds }

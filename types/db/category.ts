@@ -10,11 +10,22 @@ export enum CategoryLogCode {
     Delete = makeCode(3, 1, 2)
 }
 
+
+export enum CategoryType {
+    None = 0,
+    Watched = 1,
+    Watching = 2,
+    Planned = 3,
+    Paused = 4,
+    Dropped = 5
+}
+
 export interface Category<ListType = string | List> {
     _id: string;
     list: ListType;
     name: string;
     private: boolean;
+    type: CategoryType;
     updatedAt: string;
     createdAt: string;
 }

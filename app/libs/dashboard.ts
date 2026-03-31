@@ -16,6 +16,7 @@ export interface DashboardCategoryFilters {
 
 export class DashboardTitle {
     private data: Title;
+    private _seasons: Record<string, Record<string, { status: number }>> = {};
 
     constructor(private dashboard: Dashboard, data: Title, parentCategoryId: string) {
         this.data = {
@@ -58,6 +59,10 @@ export class DashboardTitle {
         return this.dashboard.categories.get(String(this.data.category));
     }
 
+    get seasons() {
+        return this._seasons;
+    }
+
     
     public toObject() {
         return { ...this.data };
@@ -75,12 +80,54 @@ export class DashboardTitle {
         return this.dashboard.titles.like(liked, this._id);
     }
 
+    public async rated(rated: number) {
+        return this.dashboard.titles.rated(rated, this._id);
+    }
+
     public async move(newCategoryId: string) {
         return this.dashboard.titles.move(newCategoryId, this._id);
     }
     
     public async privateMode(privateMode: boolean) {
         return this.dashboard.titles.privateMode(privateMode, this._id);
+    }
+
+
+    public async getStatusEpisodes() {
+        const data = await $fetch(`/api/titles/${this._id}/status`, {
+            method: 'GET'
+        });
+
+        if (data?.length < 1) return false;
+        
+        for (const { props } of data) {
+            const { season, episode, status } = props as Record<'season' | 'episode' | 'status', number>;
+
+            if (!this._seasons[season]) this._seasons[season] = {};
+        
+            this._seasons[season][episode] = { status };
+        }
+
+        return true;
+    }
+
+    public async setEpisodeStatus(seasonNumber: number, episodeNumber: number, status: number) {
+        if (status === undefined || status < 0 || status > 5) return false;
+
+        const data = await $fetch<{ success: boolean }>(`/api/titles/${this._id}/seasons/${seasonNumber}/${episodeNumber}`, {
+            body: {
+                status,
+            },
+            method: 'POST'
+        });
+
+        if (!data?.success) return false;
+
+        if (!this._seasons[seasonNumber]) this._seasons[seasonNumber] = {};
+        
+        this._seasons[seasonNumber][episodeNumber] = { status };
+
+        return true;
     }
 
 
@@ -118,7 +165,7 @@ export class DashboardTitles extends Array<DashboardTitle> {
 
 
     public async like(liked: number, ...titleIds: Array<string>) {
-        if (liked === undefined || liked < 0 || liked > 4 || titleIds?.length < 1) return false;
+        if (liked === undefined || liked < 0 || liked > 5 || titleIds?.length < 1) return false;
 
         const data = await $fetch<{ success: boolean, likedTitles?: Array<string> }>(`/api/titles`, {
             body: {
@@ -135,6 +182,29 @@ export class DashboardTitles extends Array<DashboardTitle> {
             if (!data.likedTitles?.includes(title._id)) continue;
 
             title.updateData({ liked });
+        }
+
+        return true;
+    }
+
+    public async rated(rated: number, ...titleIds: Array<string>) {
+        if (rated === undefined || rated < 0 || rated > 10 || titleIds?.length < 1) return false;
+
+        const data = await $fetch<{ success: boolean, ratedTitles?: Array<string> }>(`/api/titles`, {
+            body: {
+                action: 'rating',
+                ids: titleIds,
+                value: rated
+            },
+            method: 'PUT'
+        });
+
+        if (!data?.success) return false;
+
+        for (const title of this) {
+            if (!data.ratedTitles?.includes(title._id)) continue;
+
+            title.updateData({ rating: rated });
         }
 
         return true;
@@ -318,11 +388,12 @@ export class DashboardCategory {
     }
 
 
-    public async update(newCategory: Partial<Pick<Category, 'name' | 'private'>>) {
+    public async update(newCategory: Partial<Pick<Category, 'name' | 'private' | 'type'>>) {
         const data = await $fetch<Category>(`/api/categories/${this._id}`, {
             body: {
                 name: newCategory.name,
-                private: newCategory.private
+                private: newCategory.private,
+                type: newCategory.type
             },
             method: 'PATCH'
         });
