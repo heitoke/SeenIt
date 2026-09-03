@@ -52,22 +52,21 @@
                 </template>
                 <template #content :side="'top'" style="min-width: clamp(320px, 50vw, 440px);">
                     <ul class="titles">
-                        <Dialog v-for="[id, title] of selectedTitles" :key="title.id">
+                        <Dialog v-for="[id, title] of selectedTitles" :key="title.id"
+                            :title="`${$t('delete')} ${title?.title || title?.name}`"
+                            :description="$t('confirmDelete.description')"
+                        >
                             <template v-slot="{ show: showTitleDialogRemove }">
                                 <Card :title="title" :selected="true" @click="showTitleDialogRemove"/>
                             </template>
 
                             <template #content>
-                                <div>
-                                    <h2>{{ $t('delete') }} <b>{{ title?.title || title?.name }}</b></h2>
-
-                                    <p>{{ $t('confirmDelete.description') }}</p>
-
-                                    <Card :title="title" style="padding: 0;"/>
-
-                                    <Button variant="secondary">{{ $t('cancel') }}</Button>
-                                    <Button variant="destructive" @click="selectedTitles.delete(id)">{{ $t('delete') }}</Button>
-                                </div>
+                                <Card :title="title" style="padding: 0;"/>
+                            </template>
+                            
+                            <template #footer="{ hide }">
+                                <Button variant="secondary" @click="hide()">{{ $t('cancel') }}</Button>
+                                <Button variant="destructive" @click="selectedTitles.delete(id); hide();">{{ $t('delete') }}</Button>
                             </template>
                         </Dialog>
                     </ul>
