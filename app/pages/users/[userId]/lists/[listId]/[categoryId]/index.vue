@@ -390,6 +390,13 @@ definePageMeta({
     .grid-titles {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    .scroll-helper {
+        div {
+            width: 42px;
+            height: 42px;
+        }
+    }
 }
 
 @media (max-width: 460px) {
@@ -418,13 +425,6 @@ definePageMeta({
 
     .grid-titles {
         grid-template-columns: repeat(2, 1fr);
-    }
-
-    .scroll-helper {
-        div {
-            width: 42px;
-            height: 42px;
-        }
     }
 }
 
