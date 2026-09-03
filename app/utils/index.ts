@@ -15,7 +15,7 @@ export function getUrlAvatar(name?: string, options: Partial<UrlAvatarOptions> =
         colors = []
     } = options;
 
-    return `https://avatars.heito.xyz/${variant}/${size}/${name}?square=${isSquare}${isPng ? '&png=true' : ''}`;
+    return `https://avatars-heito.vercel.app/${variant}/${size}/${name}?square=${isSquare}${isPng ? '&png=true' : ''}`;
 }
 
 export function getImageTMDB(path?: string): string | null {
