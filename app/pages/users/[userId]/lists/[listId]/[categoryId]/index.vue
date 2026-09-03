@@ -401,13 +401,19 @@ definePageMeta({
 
 @media (max-width: 460px) {
     .toolsbar {
-        // flex-direction: column;
         flex-wrap: wrap;
+        
+        .ui-input {
+            margin-bottom: 4px;
+            border-right: 1px solid var(--hx-background-secondary) !important;
+            border-radius: 5px !important;
+        }
 
         button {
             &:nth-child(1) {
                 order: 1;
             }
+
 
             &:nth-child(3) {
                 order: 2;

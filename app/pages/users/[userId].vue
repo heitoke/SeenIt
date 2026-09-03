@@ -117,11 +117,13 @@ definePageMeta({
                 left: 5%;
                 bottom: -76px;
                 border: 12px solid var(--hx-background-primary);
-                background-color: var(--hx-background-primary);;
+                background-color: var(--hx-background-primary);
+                transition: .2s;
             }
 
             & + div {
                 margin: 12px 0 32px 227px;
+                transition: .2s;
             }
         }
 
@@ -133,6 +135,7 @@ definePageMeta({
             min-height: 128px;
             position: relative;
             border-radius: var(--hx-border-radius);
+            transition: .2s;
             overflow: hidden;
 
             ::v-deep(.ui-image) {
@@ -145,24 +148,49 @@ definePageMeta({
         .name {
             font-size: 20px;
             font-weight: 600;
+            transition: .2s;
         }
     }
 
-    @media (max-width: 360px) {
+    @media (max-width: 390px) {
         .header {
-            margin-bottom: 0;
-            align-items: start;
-            flex-direction: column;
+            margin-bottom: 32px;
 
-            .avatar {
-                margin: 0 auto 12px auto;
-                padding-bottom: 100%;
-                max-width: 100%;
-                min-width: 100%;
-                max-height: auto;
-                min-height: auto;
+            .banner {
+                height: 169px;
+
+                .avatar {
+                    max-width: 64px;
+                    min-width: 64px;
+                    max-height: 64px;
+                    min-height: 64px;
+                    bottom: -48px;
+                    border: 8px solid var(--hx-background-primary);
+                }
+
+                & + div {
+                    margin: 12px 0 12px 108px;
+                }
+            }
+
+            .name {
+                font-size: 16px;
             }
         }
+        // .header {
+        //     margin-bottom: 0;
+        //     align-items: start;
+        //     flex-direction: column;
+
+        //     .avatar {
+        //         margin: 0 auto 12px auto;
+        //         padding-bottom: 100%;
+        //         max-width: 100%;
+        //         min-width: 100%;
+        //         max-height: auto;
+        //         min-height: auto;
+        //     }
+        // }
     }
 }
 

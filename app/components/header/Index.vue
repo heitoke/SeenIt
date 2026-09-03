@@ -11,6 +11,26 @@
             <span class="link">{{ $t('users') }}</span>
         </NuxtLink>
 
+        <Popover>
+            <template #default="{ show }">
+                <div class="menu-links"
+                    @click="show"
+                >
+                    <IconMenu :size="16"/>
+                </div>
+            </template>
+
+            <template #content>
+                <Menu>
+                    <NuxtLink to="/users">
+                        <MenuButton>
+                            <span>{{ $t('users') }}</span>
+                        </MenuButton>
+                    </NuxtLink>
+                </Menu>
+            </template>
+        </Popover>
+
         <div style="margin-left: auto;"></div>
 
         <Language/>
@@ -31,7 +51,7 @@
 import Account from './Account.vue';
 import Language from './Language.vue';
 
-import { Bell } from 'lucide-vue-next';
+import { Bell, Menu as IconMenu } from 'lucide-vue-next';
 
 
 const { $notifications } = useNotificationsStore();
@@ -72,6 +92,10 @@ header {
     }
 }
 
+.menu-links {
+    display: none;
+}
+
 .link {
     font-size: 14px;
     opacity: .7;
@@ -89,6 +113,21 @@ header {
 
     &:hover {
         opacity: 1;
+    }
+}
+
+@media (max-width: 1280px) {
+    header {
+        margin: 0 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .menu-links {
+        display: block;
+    }
+    .link {
+        display: none;
     }
 }
 
