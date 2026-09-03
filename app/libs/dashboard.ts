@@ -365,6 +365,11 @@ export class DashboardCategory {
     }
 
 
+    public setOption(name: string, value: any) {
+        this._filters.options[name] = value;
+    }
+
+
     public async add(...listTitles: Array<TMDBTitleInSearch>) {
         if (!listTitles.length) return;
 

@@ -39,10 +39,17 @@
                 @input="onSearchInput($event.target.value)"
             />
 
+            <Button variant="outline"
+                @click="$d.list?.category?.setOption('order', !Boolean($d.list?.category?.filters.options['order']))"
+            >
+                <ArrowDownAZ v-if="!$d.list?.category?.filters.options['order']"/>
+                <ArrowDownZA v-else/>
+            </Button>
+
             <template v-if="$d.canEdit && $d.list?.category?.edit.enabled">
                 <Popover style="padding: 4px; max-width: 215px;">
                     <template v-slot="{ toggle }">
-                        <Button variant="secondary"
+                        <Button variant="outline"
                             @click="toggle"
                         >
                             <EllipsisVertical/>
@@ -135,7 +142,7 @@
             </template>
 
             <Button v-if="$d.canEdit && $d.list?.category?.titles.length > 0"
-                :variant="$d.list.category.edit.enabled ? 'default' : 'secondary'"
+                :variant="$d.list.category.edit.enabled ? 'default' : 'outline'"
                 @click="$d.list.category.toggleEditMode()"
             >
                 <Pencil class="h-4 w-4" />
@@ -185,7 +192,7 @@
 import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
 import TitleCard from '~/components/modules/titles/Card.vue';
 
-import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff, ChevronDown, ChevronUp, ArrowDownAZ, ArrowDownZA } from 'lucide-vue-next';
 
 // * Types
 import type { TMDBTitleInSearch } from '~~/types/db/tmdbTitle';
@@ -215,12 +222,15 @@ const canScrollBottom = ref<boolean>(true);
 
 const listTitles = computed(() => {
     const [size, pageCount] = page.value;
+    const { order } = $d?.list?.category?.filters?.options || {};
     
     if (categoryId === 'likes') {
         return $d.list?.likedTitles.slice(0, pageCount * size) || [];
     }
 
-    return $d.list?.category?.filterTitles.slice(0, pageCount * size) || [];
+    return $d.list?.category?.filterTitles
+        .sort((a, b) => (Boolean(order) ? (a.createdAt < b.createdAt) : (a.createdAt > b.createdAt)) ? 1 : -1)
+        .slice(0, pageCount * size) || [];
 });
 
 
@@ -339,6 +349,7 @@ definePageMeta({
     background-color: var(--hx-background-primary);
     transition: .2s;
     overflow: hidden;
+    z-index: 999999;
 
     div:last-child {
         border-top: 1px dashed var(--hx-background-secondary);
