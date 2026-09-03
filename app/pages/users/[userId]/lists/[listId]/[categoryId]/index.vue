@@ -162,6 +162,20 @@
             <template #title>{{ $t('categoryEmpty.title') }}</template>
             <template #default>{{ $t('categoryEmpty.description') }}</template>
         </Alert>
+
+        <div class="scroll-helper">
+            <div v-show="canScrollTop"
+                @click="scrollTo('top')"
+            >
+                <ChevronUp :size="14"/>
+            </div>
+
+            <div v-show="canScrollBottom"
+                @click="scrollTo()"
+            >
+                <ChevronDown :size="14"/>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -171,7 +185,7 @@
 import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
 import TitleCard from '~/components/modules/titles/Card.vue';
 
-import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff } from 'lucide-vue-next';
+import { Search, Rocket, Pencil, EllipsisVertical, Trash, Heart, HeartOff, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-vue-next';
 
 // * Types
 import type { TMDBTitleInSearch } from '~~/types/db/tmdbTitle';
@@ -194,6 +208,9 @@ const $d = $dashboards.get(userId);
 
 
 const page = ref<[number, number]>([20, 1]);
+
+const canScrollTop = ref<boolean>(false);
+const canScrollBottom = ref<boolean>(true);
 
 
 const listTitles = computed(() => {
@@ -236,7 +253,7 @@ function onClickTitle(title: DashboardTitle) {
     $d.list.category.edit.selected[$d.list.category.edit.selected.has(title._id) ? 'delete' : 'add'](title._id);
 }
 
-async function onDeleteTitles() {
+function onDeleteTitles() {
     if (!$d.list) return;
 
     $d.titles.delete(...$d.list.category?.edit.selected || []);
@@ -244,7 +261,7 @@ async function onDeleteTitles() {
     $d.list?.category?.edit.selected.clear();
 }
 
-async function onMoveTitles(categoryId: string) {
+function onMoveTitles(categoryId: string) {
     if (!$d.list) return;
 
     $d.titles.move(categoryId, ...$d.list.category?.edit.selected || []);
@@ -253,10 +270,21 @@ async function onMoveTitles(categoryId: string) {
 }
 
 
+function scrollTo(type: 'top' | 'bottom' = 'bottom') {
+    document.scrollingElement?.scrollTo({
+        behavior: 'smooth',
+        top: type === 'top' ? 0 : document.scrollingElement?.scrollHeight
+    })
+}
+
+
 function onScroll(event: Event) {
     if (!document.scrollingElement) return;
 
     const { scrollHeight, scrollTop } = document.scrollingElement!;
+
+    canScrollTop.value = scrollTop > (window.innerHeight / 2);
+    canScrollBottom.value = scrollTop < (scrollHeight - window.innerHeight);
 
     if (window.innerHeight + scrollTop > scrollHeight - (window.innerHeight / 6)) {
         page.value[1]++;
@@ -300,6 +328,35 @@ definePageMeta({
     grid-template-columns: repeat(5, 1fr);
     gap: 12px;
     z-index: 2;
+}
+
+.scroll-helper {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    border-radius: 50px;
+    border: 1px solid var(--hx-background-secondary);
+    background-color: var(--hx-background-primary);
+    transition: .2s;
+    overflow: hidden;
+
+    div:last-child {
+        border-top: 1px dashed var(--hx-background-secondary);
+    }
+    
+    div {
+        cursor: pointer;
+        display: flex;
+        width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        transition: .2s;
+
+        &:hover {
+            background-color: var(--hx-background-secondary);
+        }
+    }
 }
 
 

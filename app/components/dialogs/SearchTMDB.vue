@@ -11,7 +11,7 @@
 
         <template v-slot:content="{ hide }">
             <div>
-                <div class="group">
+                <Group>
                     <Select placeholder="Выбрать тип" style="min-width: 169px;"
                         :options="[
                             { label: `${$t('movie')} & ${$t('tv')}`, value: 'multi' },
@@ -26,9 +26,9 @@
                     <Input placeholder="Название" style="width: 100%;"
                         @input="onInput($event as any)"
                     />
-                </div>
+                </Group>
     
-                <ul class="titles">
+                <ul class="titles" v-if="listTitles.length > 0 && !loadingTitles">
                     <Card v-for="title of listTitles" :key="title.id"
                         :class="{ disabled: ignoreTitleIds.includes(title.id) }"
                         :title="title"
@@ -37,7 +37,14 @@
                         @click="selectTitle(title)"
                     />
                 </ul>
-    
+
+                <Alert style="margin-top: 8px;" v-if="loadingTitles">
+                    <template #picture>
+                        <Loader2 class="animation-spin"/>
+                    </template>
+                    
+                    <template #title>{{ $t('pleaseWait') }}</template>
+                </Alert>
             </div>
         </template>
 
@@ -70,30 +77,6 @@
                             </template>
                         </Dialog>
                     </ul>
-
-                    <!-- <Dialog>
-                        <DialogTrigger as-child>
-                            <Button variant="destructive" style="margin-top: 12px;" v-if="selectedTitles.size > 3">
-                                <span>{{ $t('clear') }}</span>
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent class="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>{{ $t('clear') }}</DialogTitle>
-                                <DialogDescription>-_^</DialogDescription>
-                            </DialogHeader>
-                            
-                            <DialogFooter>
-                                <DialogClose>
-                                    <Button variant="secondary">{{ $t('cancel') }}</Button>
-                                </DialogClose>
-                                
-                                <DialogClose>
-                                    <Button variant="destructive" @click="selectedTitles.clear()">{{ $t('delete') }}</Button>
-                                </DialogClose>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog> -->
                 </template>
             </Popover>
 
@@ -161,6 +144,7 @@ const $d = $dashboards.get(props.userId);
 
 const open = ref(false);
 const loading = ref(false);
+const loadingTitles = ref(false);
 const type = ref<Type>('multi');
 
 
@@ -183,6 +167,23 @@ const ignoreTitleIds = computed(() => {
 const listTitles = computed(() => titles.value[type.value].list);
 
 
+async function searchTitles(text: string = '') {
+    loadingTitles.value = true;
+
+    const data = await $fetch('/api/tmdb/search', {
+        query: {
+            type: type.value,
+            text,
+            lang: 'ru-RU'
+        }
+    });
+
+    loadingTitles.value = false;
+
+    titles.value[type.value].list = data.results.filter(t => t?.media_type === 'movie' || t?.media_type === 'tv');
+}
+
+
 let timer: NodeJS.Timeout;
 
 function onInput(event: InputEvent) {
@@ -194,17 +195,7 @@ function onInput(event: InputEvent) {
 
     titles.value[type.value].text = value;
     
-    timer = setTimeout(async () => {
-        const data = await $fetch('/api/tmdb/search', {
-            query: {
-                type: type.value,
-                text: value,
-                lang: 'ru-RU'
-            }
-        });
-
-        titles.value[type.value].list = data.results.filter(t => t?.media_type === 'movie' || t?.media_type === 'tv');
-    }, 500);
+    timer = setTimeout(() => searchTitles(value), 500);
 }
 
 function selectTitle(title: TMDBTitleInSearch) {
