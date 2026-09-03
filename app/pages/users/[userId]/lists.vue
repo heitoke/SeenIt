@@ -1,7 +1,7 @@
 <template>
     <div class="user-lists">
         <div class="sidebar">
-            <div class="group">
+            <Group>
                 <Select style="width: 100%;"
                     :placeholder="$t('selectList')"
                     :options="$d.lists.map(list => ({
@@ -15,12 +15,11 @@
 
                 <Popover v-if="$d.canEdit">
                     <template v-slot="{ toggle }">
-                        <Button variant="secondary"
-                            style="margin-left: 8px; width: 32px; min-height: 32px;"
+                        <Button variant="outline"
 
                             @click="toggle"
                         >
-                            <EllipsisVertical/>
+                            <EllipsisVertical :size="12"/>
                         </Button>
                     </template>
 
@@ -62,7 +61,7 @@
                         </Menu>
                     </template>
                 </Popover>
-            </div>
+            </Group>
 
             <template v-if="$d.list !== null">
                 <Button v-if="$d.list.likedTitles.length > 0"

@@ -179,6 +179,7 @@
 
             <div v-show="canScrollBottom"
                 @click="scrollTo()"
+                @contextmenu.prevent.stop="scrollToBottom"
             >
                 <ChevronDown :size="14"/>
             </div>
@@ -285,6 +286,14 @@ function scrollTo(type: 'top' | 'bottom' = 'bottom') {
         behavior: 'smooth',
         top: type === 'top' ? 0 : document.scrollingElement?.scrollHeight
     })
+}
+
+function scrollToBottom() {
+    if (!$d.list?.category?.filterTitles?.length) return;
+
+    page.value = [20, Math.floor($d.list?.category?.filterTitles?.length / 20) + 1];
+
+    setTimeout(() => scrollTo('bottom'), 500);
 }
 
 
@@ -409,6 +418,13 @@ definePageMeta({
 
     .grid-titles {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .scroll-helper {
+        div {
+            width: 42px;
+            height: 42px;
+        }
     }
 }
 
