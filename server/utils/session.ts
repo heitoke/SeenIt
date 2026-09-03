@@ -17,8 +17,6 @@ export async function $useSession(event: H3Event, userId?: string) {
         maxAge: 60 * 60 * 24 * 7
     });
 
-    console.log(session?.id, session?.data)
-
     if (userId) await session.update({ id: userId });
 
     if (session?.data?.id) {

@@ -38,86 +38,87 @@
                     />
                 </ul>
     
-                <ButtonGroup>
-                    <Popover side="top" v-if="selectedTitles.size > 1">
-                        <template v-slot="{ toggle }">
-                            <Button @click="toggle">
-                                <ChevronUp/>
-
-                                <span>{{ $t('selected') }} <b>{{ selectedTitles.size }}</b></span>
-                            </Button>
-                        </template>
-                        <template #content :side="'top'" style="min-width: clamp(320px, 50vw, 440px);">
-                            <ul class="titles">
-                                <Dialog v-for="[id, title] of selectedTitles" :key="title.id">
-                                    <template v-slot="{ show: showTitleDialogRemove }">
-                                        <Card :title="title" :selected="true" @click="showTitleDialogRemove"/>
-                                    </template>
-
-                                    <template #content>
-                                        <div>
-                                            <h2>{{ $t('delete') }} <b>{{ title?.title || title?.name }}</b></h2>
-
-                                            <p>{{ $t('confirmDelete.description') }}</p>
-
-                                            <Card :title="title" style="padding: 0;"/>
-
-                                            <Button variant="secondary">{{ $t('cancel') }}</Button>
-                                            <Button variant="destructive" @click="selectedTitles.delete(id)">{{ $t('delete') }}</Button>
-                                        </div>
-                                    </template>
-                                </Dialog>
-                            </ul>
-
-                            <!-- <Dialog>
-                                <DialogTrigger as-child>
-                                    <Button variant="destructive" style="margin-top: 12px;" v-if="selectedTitles.size > 3">
-                                        <span>{{ $t('clear') }}</span>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent class="sm:max-w-[425px]">
-                                    <DialogHeader>
-                                        <DialogTitle>{{ $t('clear') }}</DialogTitle>
-                                        <DialogDescription>-_^</DialogDescription>
-                                    </DialogHeader>
-                                    
-                                    <DialogFooter>
-                                        <DialogClose>
-                                            <Button variant="secondary">{{ $t('cancel') }}</Button>
-                                        </DialogClose>
-                                        
-                                        <DialogClose>
-                                            <Button variant="destructive" @click="selectedTitles.clear()">{{ $t('delete') }}</Button>
-                                        </DialogClose>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog> -->
-                        </template>
-                    </Popover>
-
-                    <Button :disabled="selectedTitles.size < 1 || loading"
-                        @click="$emit('save', {
-                            titles: [...selectedTitles.values()],
-                            close: () => {
-                                hide();
-
-                                titles[type] = { text: '', list: [] };
-                                selectedTitles.clear();
-                            },
-                            loading: (bool: boolean) => loading = bool
-                        })"
-                    >
-                        <template v-if="loading">
-                            <Loader2 class="animation-spin" />
-                            {{ $t('pleaseWait') }}...
-                        </template>
-                        <template v-else>
-                            <Plus/>
-                            <span>{{ $t('addTitles') }}</span>
-                        </template>
-                    </Button>
-                </ButtonGroup>
             </div>
+        </template>
+
+        <template v-slot:footer="{ hide }">
+            <Popover side="top" v-if="selectedTitles.size > 1">
+                <template v-slot="{ toggle }">
+                    <Button @click="toggle">
+                        <ChevronUp/>
+
+                        <span>{{ $t('selected') }} <b>{{ selectedTitles.size }}</b></span>
+                    </Button>
+                </template>
+                <template #content :side="'top'" style="min-width: clamp(320px, 50vw, 440px);">
+                    <ul class="titles">
+                        <Dialog v-for="[id, title] of selectedTitles" :key="title.id">
+                            <template v-slot="{ show: showTitleDialogRemove }">
+                                <Card :title="title" :selected="true" @click="showTitleDialogRemove"/>
+                            </template>
+
+                            <template #content>
+                                <div>
+                                    <h2>{{ $t('delete') }} <b>{{ title?.title || title?.name }}</b></h2>
+
+                                    <p>{{ $t('confirmDelete.description') }}</p>
+
+                                    <Card :title="title" style="padding: 0;"/>
+
+                                    <Button variant="secondary">{{ $t('cancel') }}</Button>
+                                    <Button variant="destructive" @click="selectedTitles.delete(id)">{{ $t('delete') }}</Button>
+                                </div>
+                            </template>
+                        </Dialog>
+                    </ul>
+
+                    <!-- <Dialog>
+                        <DialogTrigger as-child>
+                            <Button variant="destructive" style="margin-top: 12px;" v-if="selectedTitles.size > 3">
+                                <span>{{ $t('clear') }}</span>
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent class="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>{{ $t('clear') }}</DialogTitle>
+                                <DialogDescription>-_^</DialogDescription>
+                            </DialogHeader>
+                            
+                            <DialogFooter>
+                                <DialogClose>
+                                    <Button variant="secondary">{{ $t('cancel') }}</Button>
+                                </DialogClose>
+                                
+                                <DialogClose>
+                                    <Button variant="destructive" @click="selectedTitles.clear()">{{ $t('delete') }}</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog> -->
+                </template>
+            </Popover>
+
+            <Button :disabled="selectedTitles.size < 1 || loading"
+                @click="$emit('save', {
+                    titles: [...selectedTitles.values()],
+                    close: () => {
+                        hide();
+
+                        titles[type] = { text: '', list: [] };
+                        selectedTitles.clear();
+                    },
+                    loading: (bool: boolean) => loading = bool
+                })"
+            >
+                <template v-if="loading">
+                    <Loader2 class="animation-spin" />
+                    {{ $t('pleaseWait') }}...
+                </template>
+                <template v-else>
+                    <Plus/>
+                    <span>{{ $t('addTitles') }}</span>
+                </template>
+            </Button>
         </template>
     </Dialog>
 </template>

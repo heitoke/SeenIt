@@ -81,8 +81,6 @@ export default defineEventHandler(async (event) => {
 
         await log.save();
 
-        console.log(log?.props)
-
         if (result === 'accept') {
             const list = await ListSchema.findOne({ _id: { $in: log?.props?.list?._id } });
 

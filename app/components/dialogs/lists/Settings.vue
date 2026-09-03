@@ -16,7 +16,7 @@
 
                 <Checkbox name="view-mode-list" :label="$t('privateMode')"
                     style="margin: 12px 0;"
-                    v-model="list.private"
+                    v-model:value="list.private"
                 />
 
                 <template v-if="list?.members?.length > 0">
@@ -36,28 +36,28 @@
                         </UserCard>
                     </div>
                 </template>
-
-                <ButtonGroup>
-                    <InvateMembers v-slot="{ show }"
-                        @invite="inviteMembers"
-                    >
-                        <Button variant="secondary" @click="show">
-                            <UserPlus/>
-                            <span>Add member</span>
-                        </Button>
-                    </InvateMembers>
-
-                    <Button variant="destructive" @click="onDelete(hide)">
-                        <Trash/>
-                        <span>{{ $t('delete') }}</span>
-                    </Button>
-
-                    <Button @click="onSave(hide)">
-                        <Save/>
-                        <span>{{ $t('save') }}</span>
-                    </Button>
-                </ButtonGroup>
             </div>
+        </template>
+
+        <template v-slot:footer="{ show, hide }">
+            <InvateMembers v-slot="{ show }"
+                @invite="inviteMembers"
+            >
+                <Button variant="secondary" @click="show">
+                    <UserPlus/>
+                    <span>Add member</span>
+                </Button>
+            </InvateMembers>
+
+            <Button variant="destructive" @click="onDelete(hide)">
+                <Trash/>
+                <span>{{ $t('delete') }}</span>
+            </Button>
+
+            <Button @click="onSave(hide)">
+                <Save/>
+                <span>{{ $t('save') }}</span>
+            </Button>
         </template>
     </Dialog>
 </template>

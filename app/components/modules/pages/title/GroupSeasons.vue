@@ -4,12 +4,21 @@
 
         <Carousel class="seasons" :inset="true" :items="data.seasons" :step="6" :gap="12">
             <template #item="{ item: season, index }">
-                <div @click="selectSeason(season.season_number)">
+                <div :class="{ active: selectedSeason === season.season_number }"
+                    @click="selectSeason(season.season_number)"
+                >
                     <div class="image">
                         <Image
                             :src="season?.poster_path ? `${$config.public.tmdbImageUrl}/t/p/original${season?.poster_path}` : null"
                             alt="Season Poster"
                         />
+
+                        <div class="badge" v-if="title?.seasons[season.season_number]">
+                            <CircleCheck :size="14" v-if="Object.keys(title?.seasons[season?.season_number]!).length === season.episode_count"/>
+                            <CircleDashed :size="14" v-else/>
+
+                            <span>{{ Object.keys(title?.seasons[season?.season_number]!).length }}/{{ season.episode_count }}</span>
+                        </div>
                     </div>
 
                     <div class="name">{{ season.name }}</div>
@@ -46,12 +55,12 @@
                                             alt="Season Poster"
                                         />
 
-                                        <div class="status" v-if="season && (title?.seasons[season?.season_number] && title?.seasons[season?.season_number!]![episode?.episode_number]?.status > 0)">
+                                        <div class="status" v-if="season && (title?.seasons[season?.season_number] && title?.seasons[season?.season_number!]![episode?.episode_number]?.status! > 0)">
                                             {{ $t(`categoryTypes.${title?.seasons[season?.season_number]![episode?.episode_number]?.status}`) }}
                                         </div>
                                     </div>
 
-                                    <div class="name">{{ episode.name }}</div>
+                                    <div class="name">{{ episode.name }} ({{ index + 1 }})</div>
 
                                     <ul>
                                         <li>
@@ -96,13 +105,11 @@
 
 // * Components
 import Image from '~/components/ui/Image.vue';
-import Carousel from '~/components/ui/Carousel.vue';
-import { Star, Timer, Calendar } from 'lucide-vue-next';
+import { Star, Timer, Calendar , CircleDashed, CircleCheck } from 'lucide-vue-next';
 
 // * Types
 import type { DashboardTitle } from '~/libs/dashboard';
 import type { Season } from '~~/types/db/tmdbTitle';
-import { CategoryType } from '~~/types/db/category';
 
 
 const $config = useRuntimeConfig();
@@ -167,6 +174,14 @@ async function selectSeason(seasonNumber: number) {
         .carousel-slide {
             cursor: pointer;
             position: relative;
+
+            & > .active {
+                .image {
+                    border-radius: var(--hx-border-radius);
+                    border: 4px solid var(--hx-background-secondary);
+                    transform: scale(.95);
+                }
+            }
             
             .image {
                 width: 100%;
@@ -183,6 +198,28 @@ async function selectSeason(seasonNumber: number) {
                     object-fit: cover;
                     object-position: center;
                     z-index: 1;
+                }
+
+                .badge {
+                    cursor: pointer;
+                    display: flex;
+                    padding: 4px 8px;
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    color: var(--hx-text-primary);
+                    font-size: 12px;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: var(--hx-border-radius);
+                    background-color: #00000045;
+                    backdrop-filter: blur(5px);
+                    box-sizing: border-box;
+                    transition: .2s;
+                    user-select: none;
+                    opacity: .7;
+                    z-index: 2;
+                    gap: 4px;
                 }
             }
 
@@ -263,6 +300,7 @@ async function selectSeason(seasonNumber: number) {
 
             ul {
                 display: flex;
+                margin-top: 2px;
                 flex-wrap: wrap;
                 gap: 2px;
 

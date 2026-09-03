@@ -266,7 +266,7 @@ const titleRuntime = computed(() => {
         background-color: #00000095;
         backdrop-filter: blur(5px);
         box-sizing: border-box;
-        transform: translateY(calc(100% - 24px));
+        transform: translateY(calc(100% - 23px));
         transition: .2s;
         z-index: 5;
 

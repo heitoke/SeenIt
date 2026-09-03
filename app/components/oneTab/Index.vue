@@ -60,7 +60,6 @@ async function handleIFrameMessage(event: MessageEvent<{ type: string, data: Rec
 
     if (type === 'logins:get') {
         logins.value = data.logins as any;
-        console.log(type, data)
     }
 }
 

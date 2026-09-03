@@ -80,6 +80,10 @@
                     @click="selectCategory(category._id)"
                 >
                     <div>
+                        <div class="private" v-if="category.private">
+                            <EyeOff/>
+                        </div>
+
                         <div>{{ category.name }} ({{ category.titles.length }})</div>
                         
                         <div v-if="$d.list.category?.edit.enabled && category.titles.filter(title => $d.list?.category?.edit.selected.has(title._id)).length > 0"
@@ -133,16 +137,12 @@ import NameField from '~/components/dialogs/NameField.vue';
 import ListSettings from '~/components/dialogs/lists/Settings.vue';
 import CategorySettings from '~/components/dialogs/categories/Settings.vue';
 
-import { EllipsisVertical, Pencil, Plus, Heart, Settings2 } from 'lucide-vue-next';
-
-// * Types
-import type { User } from '~~/types/db/user';
+// * Icons
+import { EllipsisVertical, Pencil, Plus, Heart, Settings2, EyeOff } from 'lucide-vue-next';
 
 
 
 const $route = useRoute();
-
-const $userAuth = useUserAuth();
 
 
 const $dashboards = useDashboardsStore();
@@ -150,20 +150,28 @@ const $dashboards = useDashboardsStore();
 const $d = $dashboards.get(String($route.params?.userId));
 
 
-const a = ref([]);
-
 function selectList(listId: string) {
     $d.select(listId);
 
     navigateTo({ name: 'user-lists-list', params: { listId } });
+
+    if ($d.list?.category) {
+        selectCategory($d.list.category._id, $d.list._id);
+    }
 }
 
-function selectCategory(categoryId: string) {
-    if (!$d.list?._id) return;
+function selectCategory(categoryId: string, listId: string | undefined = $d.list?._id) {
+    if (!listId) return;
 
-    $d.list.select(categoryId === 'likes' ? null : categoryId);
+    const list = $d.lists.get(listId);
 
-    navigateTo({ name: 'user-lists-category', params: { listId: $d.list?._id, categoryId } });
+    if (!list) return;
+
+    $d.select(list._id);
+
+    list.select(categoryId === 'likes' ? null : categoryId);
+
+    navigateTo({ name: 'user-lists-category', params: { listId, categoryId } });
 }
 
 
@@ -192,7 +200,7 @@ async function createNewCategory(name: string, hide: () => void) {
 }
 
 function isString(str: string) {
-    return !str || str.length < 1 || str.trim() === '';
+    return str || str.length > 0 || str.trim() !== '';
 }
 
 
@@ -204,17 +212,26 @@ watch(() => $route.params?.categoryId, newId => {
     $d.list?.select(String(newId));
 });
 
+watch(() => $d.alreadyFetchUserData, (value, oldValue) => {
+    if (!oldValue && value) load();
+})
 
 
-onMounted(async () => {
+function load() {
     const listId = String($route.params?.listId);
     const categoryId = String($route.params?.categoryId);
 
     if (isString(categoryId) && isString(listId)) {
-        selectList(listId);
-        selectCategory(categoryId)
+        selectCategory(categoryId, listId);
     } else if (isString(listId)) {
         selectList(listId);
+    }
+}
+
+
+onMounted(async () => {
+    if ($d.list) {
+        selectList($d.list._id);
     }
 });
 
@@ -251,6 +268,26 @@ definePageMeta({
     .group {
         display: flex;
         align-items: center;
+    }
+
+    .ui-button {
+        position: relative;
+    }
+
+    :deep(.private) {
+        width: 16px;
+        height: 16px;
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        color: var(--hx-text-primary);
+        border-radius: var(--hx-border-radius);
+        background-color: var(--hx-background-secondary);
+
+        svg {
+            width: 10px !important;
+            height: 10px !important;
+        }
     }
 }
 

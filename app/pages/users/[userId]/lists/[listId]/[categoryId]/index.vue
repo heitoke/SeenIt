@@ -1,6 +1,6 @@
 <template>
     <div class="list-titles">
-        <div class="toolsbar" v-if="$d?.list?.category">
+        <Group class="toolsbar" v-if="$d?.list?.category">
             <SearchTMDB v-if="categoryId !== 'likes' && $d.canEdit"
                 :userId="$d?._id!"
                 :listId="$d?.list?._id!"
@@ -38,12 +38,6 @@
 
                 @input="onSearchInput($event.target.value)"
             />
-
-            <Button variant="ghost" v-if="$d.canEdit && $d.list?.category?.titles.length > 0"
-                @click="$d.list.category.toggleEditMode()"
-            >
-                <Pencil class="h-4 w-4" />
-            </Button>
 
             <template v-if="$d.canEdit && $d.list?.category?.edit.enabled">
                 <Popover style="padding: 4px; max-width: 215px;">
@@ -139,7 +133,14 @@
                     </template>
                 </Popover>
             </template>
-        </div>
+
+            <Button v-if="$d.canEdit && $d.list?.category?.titles.length > 0"
+                :variant="$d.list.category.edit.enabled ? 'default' : 'secondary'"
+                @click="$d.list.category.toggleEditMode()"
+            >
+                <Pencil class="h-4 w-4" />
+            </Button>
+        </Group>
 
         <div class="grid-titles" v-if="listTitles?.length > 0">
             <TitleCard v-for="title of listTitles" :key="title._id"
@@ -167,7 +168,6 @@
 <script lang="ts" setup>
 
 // * Components
-import Alert from '~/components/ui/Alert.vue';
 import SearchTMDB from '~/components/dialogs/SearchTMDB.vue';
 import TitleCard from '~/components/modules/titles/Card.vue';
 
@@ -287,14 +287,11 @@ definePageMeta({
 
 
 .toolsbar {
-    display: flex;
     padding: 8px 0;
     position: sticky;
     top: 0;
     left: 0px;
-    align-items: center;
     background-color: var(--hx-background-primary);
-    gap: 12px;
     z-index: 10;
 }
 

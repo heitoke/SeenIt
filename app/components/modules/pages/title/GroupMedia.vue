@@ -2,7 +2,7 @@
     <div class="group-media" v-if="Object.keys(media).length > 0">
         <h2>Медиа</h2>
 
-        <ButtonGroup style="margin: 12px 0; justify-content: start;">
+        <Group style="margin: 12px 0; justify-content: start;">
             <Button v-for="(value, key) in media" :key="key"
                 :variant="selectedMedia === key ? 'default' : 'secondary'"
 
@@ -11,7 +11,7 @@
                 <ImageIcon :size="14"/>
                 <span>{{ $t(key) }} ({{ value.length }})</span>
             </Button>
-        </ButtonGroup>
+        </Group>
 
         <Carousel :class="['media-images', selectedMedia]" v-if="selectedMedia !== 'videos'"
             :inset="true" :items="media[selectedMedia]" :step="6" :gap="12"
@@ -26,33 +26,31 @@
                         </div>
                     </template>
 
-                    <template #content="{ hide }">
+                    <template #content>
                         <div>
                             <Image style="max-width: 90vw; max-height: 90vh;"
                                 :src="getImageTMDB(item.file_path)"
                             />
-
-                            <ButtonGroup>
-                                <Button :disabled="true" variant="secondary">
-                                    <ImageUpscale :size="10"/>
-
-                                    <span>Size ({{ item.aspect_ratio }}): {{ item.width }}x{{ item.height }}</span>
-                                </Button>
-
-                                <Button :disabled="true" variant="secondary">
-                                    <Star :size="10" style="fill: yellow; stroke: yellow;"/>
-
-                                    <span>{{ item?.vote_average.toFixed(1) }}/{{ item?.vote_count }}</span>
-                                </Button>
-
-                                <Button @click="hide">
-                                    <X :size="10"/>
-                                    <span>{{ $t('close') }}</span>
-                                </Button>
-                            </ButtonGroup>
-
-                            <div></div>
                         </div>
+                    </template>
+
+                    <template #footer="{ hide }">
+                        <Button :disabled="true" variant="secondary">
+                            <ImageUpscale :size="10"/>
+
+                            <span>Size ({{ item.aspect_ratio }}): {{ item.width }}x{{ item.height }}</span>
+                        </Button>
+
+                        <Button :disabled="true" variant="secondary">
+                            <Star :size="10" style="fill: yellow; stroke: yellow;"/>
+
+                            <span>{{ item?.vote_average.toFixed(1) }}/{{ item?.vote_count }}</span>
+                        </Button>
+
+                        <Button @click="hide">
+                            <X :size="10"/>
+                            <span>{{ $t('close') }}</span>
+                        </Button>
                     </template>
                 </Dialog>
 
@@ -66,36 +64,23 @@
             </template>
         </Carousel>
 
-        <!-- <Carousel class="media-videos" v-if="selectedMedia === 'videos'"
-            :inset="true" :items="media[selectedMedia]" :step="6" :gap="12"
+        <Carousel class="media-videos" v-if="selectedMedia === 'videos'"
+            :inset="true" :items="media[selectedMedia].filter(i => i.site === 'YouTube')" :step="3" :gap="12"
         >
             <template #item="{ item, index }"
                 @click="selectedSeason = index"
             >
-                <div class="image" @click="selectedSeason = index">
-                    <Image
-                        :src="season?.poster_path ? `${$config.public.tmdbImageUrl}/t/p/original${season?.poster_path}` : null"
-                        alt="Season Poster"
-                    />
-                </div>
-
-                <div class="name">{{ season.name }}</div>
-
-                <ul>
-                    <li>
-                        <Timer :size="10"/>
-
-                        <span>{{ season.episode_count }}</span>
-                    </li>
-
-                    <li>
-                        <Calendar :size="10"/>
-
-                        <span>{{ new Date(season.air_date).getFullYear() }}</span>
-                    </li>
-                </ul>
+                <iframe
+                    width="100%" height="256px" 
+                    :src="`https://www.youtube.com/embed/${item.key}`" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen
+                />
             </template>
-        </Carousel> -->
+        </Carousel>
     </div>
 </template>
 
@@ -103,7 +88,6 @@
 
 // * Components
 import Image from '~/components/ui/Image.vue';
-import Carousel from '~/components/ui/Carousel.vue';
 import { ImageUpscale, Star, X, Image as ImageIcon, Calendar } from 'lucide-vue-next';
 
 // * Types
@@ -247,6 +231,16 @@ onMounted(() => {
                     }
                 }
             }
+        }
+    }
+
+    :deep(.media-videos) {
+        .carousel-slide {
+            cursor: pointer;
+            position: relative;
+            border-radius: var(--hx-border-radius);
+            overflow: hidden;
+            border: 2px dashed var(--hx-background-secondary);
         }
     }
 }

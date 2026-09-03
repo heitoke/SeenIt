@@ -53,6 +53,10 @@
             </div>
         </div>
 
+        <GroupDetails v-if="title"
+            :title="title"
+        />
+
         <GroupSeasons v-if="title && data.mediaType === 1"
             :title="title"
         />
@@ -76,6 +80,7 @@ import BadgeRating from '~/components/modules/titles/badges/Rating.vue';
 import BadgePrivate from '~/components/modules/titles/badges/Private.vue';
 import BadgeParent from '~/components/modules/titles/badges/Parent.vue';
 import TitleContext from '~/components/modules/titles/Context.vue';
+import GroupDetails from '~/components/modules/pages/title/GroupDetails.vue';
 import GroupSeasons from '~/components/modules/pages/title/GroupSeasons.vue';
 import GroupMedia from '~/components/modules/pages/title/GroupMedia.vue';
 import GroupRecommendations from '~/components/modules/pages/title/GroupRecommendations.vue';
@@ -83,7 +88,7 @@ import GroupRecommendations from '~/components/modules/pages/title/GroupRecommen
 import { EllipsisVertical, Star } from 'lucide-vue-next';
 
 // * Types
-import type { DashboardTitle } from '~/libs/dashboard';
+import { DashboardCategory, DashboardList, DashboardTitle } from '~/libs/dashboard';
 
 
 const $route = useRoute();
@@ -104,15 +109,21 @@ async function loadTitle(titleId: string) {
 
     if (!data?._id) return;
 
-    const $d = $dashboards.get(data.category.list.user._id);
+    const $d = $dashboards.get(data.category.list.user._id)!;
 
-    if (!$d.alreadyFetchUse) await $d.fetchUser();
+    if (!$d.alreadyFetchUser) await $d.fetchUser();
+
+    $d.lists.push(new DashboardList($d as any, data.category.list));
+    $d.categories.push(new DashboardCategory($d as any, data.category, data.category.list._id));
+    $d.titles.push(new DashboardTitle($d as any, data, data.category._id));
 
     const cacheTitle = await $d.titles.get(String(data?._id));
 
     if (!cacheTitle) return;
 
     title.value = cacheTitle;
+
+    cacheTitle?.getStatusEpisodes();
 }
 
 

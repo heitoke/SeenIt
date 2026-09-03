@@ -14,17 +14,26 @@
                 <Input
                     v-model:value="name"
                 />
-                
-                <Button :disabled="!name"
-                    type="submit"
-                    @click="$emit('save', { name, hide })"
-                >{{ btnText || $t('save') }}</Button>
             </div>
+        </template>
+        
+        <template v-slot:footer="{ hide }">
+            <Button :disabled="!name"
+                type="submit"
+                @click="$emit('save', { name, hide })"
+            >
+                <Save/>
+                <span>{{ btnText || $t('save') }}</span>
+            </Button>
         </template>
     </Dialog>
 </template>
 
 <script lang="ts" setup>
+
+// * Icons
+import { Save } from 'lucide-vue-next';
+
 
 export interface List {
     name: string;

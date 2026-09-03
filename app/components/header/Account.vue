@@ -56,7 +56,7 @@ const { user, d: $d, logOut } = useUserAuth();
 
 
 onMounted(() => {
-    if (!$d.alreadyFetchUse) {
+    if (!$d.alreadyFetchUser) {
         $d.fetchUser();
     }
 });

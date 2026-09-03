@@ -52,5 +52,15 @@ export default defineEventHandler(async (event) => {
         .select('-user -__v')
         .lean();
 
-    return logs;
+    const result: Record<number, Record<number, { status: number }>> = {};
+
+    for (const { props } of logs) {
+        const { season, episode, status } = props as Record<'season' | 'episode' | 'status', number>;
+
+        if (!result[season]) result[season] = {};
+    
+        result[season][episode] = { status };
+    }
+
+    return result;
 });

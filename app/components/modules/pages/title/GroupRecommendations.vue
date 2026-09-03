@@ -63,7 +63,6 @@
 import TitleCard from '~/components/modules/titles/Card.vue';
 import TitleAdd from '~/components/dialogs/titles/Add.vue';
 import Image from '~/components/ui/Image.vue';
-import Carousel from '~/components/ui/Carousel.vue';
 import { Star, Calendar } from 'lucide-vue-next';
 
 // * Types
@@ -193,6 +192,7 @@ onMounted(() => {
                 z-index: 5;
 
                 .name {
+                    margin-bottom: 4px;
                     font-size: 14px;
                     font-weight: 700;
                     color: var(--hx-text-primary);

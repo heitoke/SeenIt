@@ -9,14 +9,12 @@
             <slot :show="show" :hide="hide"/>
         </template>
         
-        <template
-            v-slot:content="{ hide }"
-        >
+        <template v-slot:content="{ hide }">
             <div>
                 <div class="header">
                     <Tooltip>
                         <template #trigger>
-                            <CircleQuestionMark style=""/>
+                            <CircleQuestionMark :size="16" style=""/>
                         </template>
 
                         <template #default>
@@ -26,26 +24,27 @@
                         </template>
                     </Tooltip>
 
-                    <Input style="width: 100%;"
-                        placeholder="Username or email"
-                        name="username, email"
-
-                        v-model:value="username"
-                    />
-
-                    <Button
-                        :disabled="isLoading"
-                        @click="onSearchUser"
-                    >
-                        <template v-if="isLoading">
-                            <Loader2 class="animation-spin"/>
-                            ...
-                        </template>
-                        <template v-else>
-                            <Search/>
-                            <span>Поиск</span>
-                        </template>
-                    </Button>
+                    <Group style="width: 100%;">
+                        <Input style="width: 100%;"
+                            placeholder="Username or email"
+                            name="username, email"
+    
+                            v-model:value="username"
+                        />
+    
+                        <Button
+                            :disabled="isLoading"
+                            @click="onSearchUser"
+                        >
+                            <template v-if="isLoading">
+                                <Loader2 class="animation-spin"/>
+                            </template>
+                            <template v-else>
+                                <Search/>
+                                <span style="margin-left: 4px;">Поиск</span>
+                            </template>
+                        </Button>
+                    </Group>
                 </div>
 
                 <div class="user" v-if="result">
@@ -85,21 +84,21 @@
                         </div>
                     </div>
                 </template>
-
-                <ButtonGroup>
-                    <Button variant="secondary" @click="hide">
-                        <X/>
-                        <span>{{ $t('cancel') }}</span>
-                    </Button>
-
-                    <Button :disabled="selected?.length < 1"
-                        @click="onInvateMembers"
-                    >
-                        <UserPlus/>
-                        <span>Пригласить ({{ selected.length }})</span>
-                    </Button>
-                </ButtonGroup>
             </div>
+        </template>
+
+        <template v-slot:footer="{ hide }">
+            <Button variant="secondary" @click="hide">
+                <X/>
+                <span>{{ $t('cancel') }}</span>
+            </Button>
+
+            <Button :disabled="selected?.length < 1"
+                @click="onInvateMembers"
+            >
+                <UserPlus/>
+                <span>Пригласить ({{ selected.length }})</span>
+            </Button>
         </template>
     </Dialog>
 </template>
@@ -124,6 +123,9 @@ const regexUsername = /^(?!.*[_.]{2})[a-zA-Z0-9][a-zA-Z0-9_.]{1,22}[a-zA-Z0-9]$/
 const regexHostUsername = /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?::\d+)?|localhost(?::\d+)?|(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,})(?::\d+)?)@(?!.*[_.]{2})[a-zA-Z0-9][a-zA-Z0-9_.]{1,22}[a-zA-Z0-9]$/;
 
 const $request = useRequestURL();
+
+
+const { $notifications } = useNotificationsStore();
 
 
 const $emit = defineEmits({
@@ -158,9 +160,21 @@ async function onSearchUser() {
     
     isLoading.value = true;
 
-    const data = await $fetch<User>(`http://${host}/api/users/${_username}`);
+    const res = await fetch(`http://${host}/api/users/${_username}`);
     
     isLoading.value = false;
+
+    if (!res.ok) {
+        console.log(res)
+        return $notifications.add([{
+            mode: 'default',
+            title: `Request error (${res.status})`,
+            text: String(res.statusText),
+            color: 'tomato'
+        }], false);
+    }
+
+    const data = (await res.json()) as User;
 
     if (!data?._id || !data?.username) return history[username.value] = null;
 

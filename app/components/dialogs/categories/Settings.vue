@@ -15,7 +15,7 @@
 
             <Checkbox name="view-mode-list" :label="$t('privateMode')"
                 style="margin: 12px 0;"
-                v-model="category.private"
+                v-model:value="category.private"
             />
 
             <Label>{{ $t('typeCategory') }}</Label>
@@ -29,18 +29,18 @@
 
                 @select="category.type = Number($event.value)"
             />
+        </template>
 
-            <ButtonGroup>
-                <Button variant="destructive" @click="onDelete(hide)">
-                    <Trash/>
-                    <span>{{ $t('delete') }}</span>
-                </Button>
+        <template v-slot:footer="{ hide }">
+            <Button variant="destructive" @click="onDelete(hide)">
+                <Trash/>
+                <span>{{ $t('delete') }}</span>
+            </Button>
 
-                <Button @click="onSave(hide)">
-                    <Save/>
-                    <span>{{ $t('save') }}</span>
-                </Button>
-            </ButtonGroup>
+            <Button @click="onSave(hide)">
+                <Save/>
+                <span>{{ $t('save') }}</span>
+            </Button>
         </template>
     </Dialog>
 </template>

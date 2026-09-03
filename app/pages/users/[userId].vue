@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        <ButtonGroup style="margin: 12px 0; justify-content: start;">
+        <Group style="margin: 12px 0; justify-content: start;">
             <NuxtLink v-for="link of navUserLinks" :key="link.path"
                 :to="link.path.replace(':userId', String($d?._id))"
             >
@@ -24,7 +24,7 @@
                     <span>{{ $t(link.label) }}</span>
                 </Button>
             </NuxtLink>
-        </ButtonGroup>
+        </Group>
 
         <NuxtPage v-if="mode === 'ready'"/>
 
@@ -48,25 +48,18 @@
 
 <script lang="ts" setup>
 
-import Alert from '~/components/ui/Alert.vue';
-
 import { Heart, ScrollText, UserRoundMinus } from 'lucide-vue-next';
-
-// * Types
-import type { User } from '~~/types/db/user';
 
 
 const $route = useRoute();
 
-const { userId, listId, categoryId } = $route.params;
+const { userId } = $route.params;
 
 
 const $dashboards = useDashboardsStore();
 
 const $d = $dashboards.get(String(userId));
 
-
-// const user = ref<User | null>(null);
 
 const mode = ref<'ready' | 'no_user' | 'loading'>('loading');
 
@@ -87,24 +80,10 @@ const navUserLinks = [
 ];
 
 
-// async function getUserById(userId: string) {
-//     mode.value = 'loading';
-
-//     const data = await $fetch(`/api/users/${userId}`);
-
-//     if (!data) return mode.value = 'no_user';
-
-//     user.value = data;
-
-//     mode.value = 'ready';
-// }
-
-
 onMounted(async () => {
-    // await getUserById(String(userId));
     mode.value = 'loading';
 
-    if (!$d.alreadyFetchUse) await $d.fetchUser();
+    if (!$d.alreadyFetchUser) await $d.fetchUser();
 
     mode.value = $d?._id ? 'ready' : 'no_user';
 });

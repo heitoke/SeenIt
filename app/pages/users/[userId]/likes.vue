@@ -1,5 +1,16 @@
 <template>
     <div class="user-likes">
+        <Group class="toolsbar">
+            <Input id="search" type="text"
+                :placeholder="`${$t('search')}...`" class="pl-8"
+                :value="text"
+
+                style="width: 100%;"
+
+                @input="onSearchInput($event.target.value)"
+            />
+        </Group>
+
         <div class="grid-titles" v-if="listTitles?.length > 0">
             <TitleCard v-for="title of listTitles" :key="title._id"
                 :title="(title as DashboardTitle)"
@@ -31,12 +42,17 @@ const $d = $dashboards.get(String($route.params?.userId));
 
 
 const page = ref<[number, number]>([20, 1]);
+const text = ref('');
 
 
 const listTitles = computed(() => {
     const [size, pageCount] = page.value;
 
-    return $d.likedTitles.slice(0, pageCount * size) || [];
+    const regex = new RegExp(text.value, 'gi');
+
+    return $d.likedTitles.filter(title => {
+        return regex.test(title.tmdb?.title || title.tmdb?.name || '');
+    }).slice(0, pageCount * size) || [];
 });
 
 
@@ -53,6 +69,18 @@ function onScroll(event: Event) {
     if (window.innerHeight + scrollTop > scrollHeight - (window.innerHeight / 6)) {
         page.value[1]++;
     }
+}
+
+
+let timer: NodeJS.Timeout;
+
+
+function onSearchInput(value: string) {
+    clearTimeout(timer);
+
+    timer = setTimeout(() => {
+        text.value = value;
+    }, 500);
 }
 
 
@@ -81,6 +109,15 @@ definePageMeta({
     grid-template-columns: repeat(6, 1fr);
     gap: 12px;
     z-index: 2;
+}
+
+.toolsbar {
+    padding: 8px 0;
+    position: sticky;
+    top: 0;
+    left: 0px;
+    background-color: var(--hx-background-primary);
+    z-index: 10;
 }
 
 

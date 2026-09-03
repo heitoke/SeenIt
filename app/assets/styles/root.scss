@@ -50,3 +50,9 @@ ul, ol, li {
         transform: rotate(360deg);
     }
 }
+
+:deep(.ui-popover) {
+    &:has(> .ui-menu) {
+        overflow-x: none;
+    }
+}

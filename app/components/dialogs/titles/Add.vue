@@ -24,66 +24,68 @@
 
         <template #content="{ hide }">
             <div>
-                <ButtonGroup>
-                    <Button :disabled="true" variant="secondary">
-                        <Star :size="10" style="fill: yellow; stroke: yellow;"/>
-
-                        <span>{{ title?.vote_average.toFixed(1) }}/{{ title?.vote_count }}</span>
-                    </Button>
-
-                    <Button :disabled="true" variant="secondary">
-                        <Calendar :size="10"/>
-
-                        <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
-                    </Button>
-
-                    <Popover side="top">
-                        <template #default="{ toggle, isOpened }">
-                            <Button @click="toggle">
-                                <Plus :size="12" v-if="!isOpened"/>
-                                <ChevronDown v-else/>
-                                Добавить в список
-                            </Button>
-                        </template>
-
-                        <template #content>
-                            <div style="min-width: 169px;">
-                                <Select :placeholder="$t('selectList')"
-                                    :options="$d.lists.map(list => ({
-                                        label: list.name,
-                                        value: list._id
-                                    }))"
-
-                                    @select="selectedList = String($event.value)"
-                                />
-
-                                <div style="margin: 8px 0;"></div>
-
-                                <Select
-                                    :placeholder="$t('selectCategory')"
-                                    :disabled="!selectedList"
-                                    :options="$d.categories.map(category => ({
-                                        label: category.name,
-                                        value: category._id
-                                    }))"
-
-                                    @select="selectedCategory = String($event.value)"
-                                />
-
-                                <div style="margin: 8px 0;"></div>
-                                
-                                <Button style="width: 100%;"
-                                    :disabled="!selectedList || !selectedCategory || !canAddInCategory"
-
-                                    @click="onClickAdd(title, hide)"
-                                >
-                                    Добавить
-                                </Button>
-                            </div>
-                        </template>
-                    </Popover>
-                </ButtonGroup>
             </div>
+        </template>
+
+        <template #footer="{ show, hide }">
+            <Button :disabled="true" variant="secondary">
+                <Star :size="10" style="fill: yellow; stroke: yellow;"/>
+
+                <span>{{ title?.vote_average.toFixed(1) }}/{{ title?.vote_count }}</span>
+            </Button>
+
+            <Button :disabled="true" variant="secondary">
+                <Calendar :size="10"/>
+
+                <span>{{ new Date(title?.release_date || title?.first_air_date).getFullYear() }}</span>
+            </Button>
+
+            <Popover side="top">
+                <template #default="{ toggle, isOpened }">
+                    <Button @click="toggle">
+                        <Plus :size="12" v-if="!isOpened"/>
+                        <ChevronDown v-else/>
+                        <span>Добавить в список</span>
+                    </Button>
+                </template>
+
+                <template #content="{ show }">
+                    <div style="min-width: 169px;">
+                        <Select :placeholder="$t('selectList')"
+                            :options="$d.lists.map(list => ({
+                                label: list.name,
+                                value: list._id
+                            }))"
+
+                            @select="selectedList = String($event.value); show()"
+                        />
+
+                        <div style="margin: 8px 0;"></div>
+
+                        <Select
+                            :placeholder="$t('selectCategory')"
+                            :disabled="!selectedList"
+                            :options="$d.categories.filter(c => c.parentList?._id === selectedList).map(category => ({
+                                label: category.name,
+                                value: category._id
+                            }))"
+
+                            @select="selectedCategory = String($event.value); show()"
+                        />
+
+                        <div style="margin: 8px 0;"></div>
+                        
+                        <Button style="width: 100%;"
+                            :disabled="!selectedList || !selectedCategory || !canAddInCategory"
+
+                            @click="onClickAdd(title, hide)"
+                        >
+                            <Plus/>
+                            <span>Добавить</span>
+                        </Button>
+                    </div>
+                </template>
+            </Popover>
         </template>
     </Dialog>
 </template>

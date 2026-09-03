@@ -1,3 +1,6 @@
+import { Types } from 'mongoose';
+
+// * Schema
 import { UserSchema } from '~~/server/models/user.schema';
 
 // * Types
@@ -8,23 +11,22 @@ export default defineEventHandler(async (event) => {
     const userId = event.context.params?.userId;
 
     try {
-        const user = await UserSchema.findOne({
-            $or: [
-                { _id: userId },
-                { username: userId }
-            ]
+        const user = await UserSchema.findOne(Types.ObjectId.isValid(String(userId)) ? {
+            _id: userId
+        } : {
+            username: userId
         }).select('-password');
 
         if (!user) throw createError({
             statusCode: 404,
-            statusMessage: 'Not found!',
+            statusMessage: `This user does not exist in this system`,
         });
 
         return user.toJSON() as any as User;
     } catch (error) {
         throw createError({
             statusCode: 404,
-            statusMessage: 'Not found!',
+            statusMessage: `This user does not exist in this system`,
         });
     }
 });

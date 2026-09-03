@@ -1,8 +1,5 @@
 // * Types
-import type {
-    // DBList, DBCategory, DBTitle,
-    List//, Category, Title
-} from '~~/types/db/list';
+import type { List } from '~~/types/db/list';
 import type { Category } from '~~/types/db/category';
 import type { Title } from '~~/types/db/title';
 import type { TMDBTitleInSearch, TMDBTitleData } from '~~/types/db/tmdbTitle';
@@ -16,7 +13,7 @@ export interface DashboardCategoryFilters {
 
 export class DashboardTitle {
     private data: Title;
-    private _seasons: Record<string, Record<string, { status: number }>> = {};
+    private _seasons: Record<number, Record<number, { status: number }>> = {};
 
     constructor(private dashboard: Dashboard, data: Title, parentCategoryId: string) {
         this.data = {
@@ -98,15 +95,17 @@ export class DashboardTitle {
             method: 'GET'
         });
 
-        if (data?.length < 1) return false;
-        
-        for (const { props } of data) {
-            const { season, episode, status } = props as Record<'season' | 'episode' | 'status', number>;
+        this._seasons = data;
 
-            if (!this._seasons[season]) this._seasons[season] = {};
+        // if (data?.length < 1) return false;
         
-            this._seasons[season][episode] = { status };
-        }
+        // for (const { props } of data) {
+        //     const { season, episode, status } = props as Record<'season' | 'episode' | 'status', number>;
+
+        //     if (!this._seasons[season]) this._seasons[season] = {};
+        
+        //     this._seasons[season][episode] = { status };
+        // }
 
         return true;
     }
@@ -652,7 +651,7 @@ export class Dashboard {
     readonly categories: DashboardCategories;
     readonly titles: DashboardTitles;
 
-    public alreadyFetchUse: boolean = false;
+    public alreadyFetchUser: boolean = false;
     public alreadyFetchUserData: boolean = false;
 
     private selectedList: string | null = null;
@@ -737,7 +736,7 @@ export class Dashboard {
             this.user = user;
         }
 
-        this.alreadyFetchUse = true;
+        this.alreadyFetchUser = true;
 
         await this.fetchUserData();
 
@@ -756,11 +755,15 @@ export class Dashboard {
         for (const list of data) {
             this.lists.push(new DashboardList(this, list));
 
-            if (list?.categories?.length > 0) for (const category of list?.categories) {
-                this.categories.push(new DashboardCategory(this, category, list._id));
+            if (list?.categories?.length > 0) {
+                for (const category of list?.categories) {
+                    this.categories.push(new DashboardCategory(this, category, list._id));
 
-                if (category?.titles?.length > 0) for (const title of category?.titles) {
-                    this.titles.push(new DashboardTitle(this, title, category._id));
+                    if (category?.titles?.length > 0) {
+                        for (const title of category?.titles) {
+                            this.titles.push(new DashboardTitle(this, title, category._id));
+                        }
+                    }
                 }
             }
         }
