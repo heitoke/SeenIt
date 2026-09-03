@@ -16,11 +16,12 @@ export default defineNuxtConfig({
     css: ['~/assets/styles/root.scss'],
 
     modules: [
-        '@heito/hxui/nuxt',
-        '@pinia/nuxt',
-        '@nuxtjs/i18n',
-        'nuxt-mongoose',
-        './server/modules/auth.module'
+      '@heito/hxui/nuxt',
+      '@pinia/nuxt',
+      '@nuxtjs/i18n',
+      'nuxt-mongoose',
+      './server/modules/auth.module',
+      '@vite-pwa/nuxt',
     ],
 
     runtimeConfig: {
@@ -58,4 +59,41 @@ export default defineNuxtConfig({
             }
         })
     },
+
+    pwa: {
+        strategies: 'generateSW',
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        manifest: {
+            name: 'SeenIt',
+            short_name: 'SeenIt',
+            theme_color: '#000000',
+            background_color: '#000000',
+            description: 'SeenIt',
+            start_url: '/app',
+            display: 'standalone',
+            icons: [
+                {
+                    src: 'seen-it-dark-256x256.png',
+                    sizes: '256x256',
+                    type: 'image/png'
+                },
+                {
+                    src: 'seen-it-dark-512x512.png',
+                    sizes: '512x512',
+                    type: 'image/png'
+                },
+                {
+                    src: 'seen-it-dark-512x512.png', 
+                    sizes: '512x512',
+                    type: 'image/png',
+                    purpose: 'any maskable' 
+                }
+            ]
+        },
+        devOptions: {
+            enabled: true,
+            type: 'module'
+        }
+    }
 });

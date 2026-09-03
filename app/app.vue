@@ -5,6 +5,8 @@
         <!-- <OneTab/> -->
     </template>
     
+    <NuxtPwaManifest/>
+    
     <Transition name="fade">
         <NuxtPage class="page"/>
     </Transition>
